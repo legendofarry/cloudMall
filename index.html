@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kids Mall App</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons for the visuals -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <style>
+        /* Custom Animations */
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .modal-enter {
+            animation: slideUp 0.3s ease-out forwards;
+        }
+
+        .spinner {
+            animation: spin 2s linear infinite;
+        }
+
+        /* Hide Scrollbar but keep functionality */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Utility for switching views */
+        .view-section {
+            display: none;
+            padding-bottom: 100px; /* Space for bottom nav */
+            animation: fadeIn 0.3s ease;
+        }
+        .view-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans select-none">
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="max-w-md mx-auto bg-white min-h-screen shadow-2xl relative overflow-hidden">
+
+        <!-- =========================
+             1. SAFETY SCANNER OVERLAY
+             ========================= -->
+        <div id="safety-scanner" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+            <div class="bg-white p-6 rounded-2xl text-center max-w-sm mx-4 border-4 border-blue-400 w-full">
+                <div id="scan-loading">
+                    <div class="mx-auto mb-4 text-blue-500 spinner w-16 h-16 flex items-center justify-center">
+                        <i class="ph-fill ph-shield-check text-6xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-blue-600">Kid-Safe Guard™</h3>
+                    <p class="text-gray-600 mt-2">Scanning content...</p>
+                    <p class="text-xs text-gray-400 mt-4">Checking for safety compliance.</p>
+                </div>
+                <div id="scan-success" class="hidden text-green-500">
+                    <i class="ph-fill ph-check-circle text-6xl mx-auto mb-4"></i>
+                    <h3 class="text-xl font-bold">Safe!</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- =========================
+             2. AUTH LOGIN MODAL
+             ========================= -->
+        <div id="auth-modal" class="hidden fixed inset-0 z-40 bg-white/95 pt-20 px-6 modal-enter">
+            <button onclick="closeModal('auth-modal')" class="absolute top-6 right-6 text-gray-500 font-bold">Close</button>
+            <div class="text-center">
+                <div class="w-20 h-20 bg-yellow-400 rounded-full mx-auto mb-6 flex items-center justify-center text-3xl">👋</div>
+                <h2 class="text-3xl font-black text-indigo-900 mb-2">Join the Fun!</h2>
+                <p class="text-gray-500 mb-8">Ask a parent to help you sign in to play, chat, and shop.</p>
+                
+                <input type="text" placeholder="Username" class="w-full p-4 bg-gray-100 rounded-xl mb-4 outline-none focus:ring-2 ring-indigo-400">
+                <input type="password" placeholder="Parent Password" class="w-full p-4 bg-gray-100 rounded-xl mb-6 outline-none focus:ring-2 ring-indigo-400">
+                
+                <button onclick="performLogin()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl shadow-lg active:scale-95 transition-transform">
+                    Enter the Mall
+                </button>
+            </div>
+        </div>
+
+        <!-- =========================
+             3. BUSINESS FORM MODAL
+             ========================= -->
+        <div id="business-modal" class="hidden fixed inset-0 z-50 bg-white pt-10 px-6 overflow-y-auto modal-enter">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-black text-gray-800">Open a Shop</h2>
+                <button onclick="closeModal('business-modal')" class="bg-gray-100 p-2 rounded-full"><i class="ph-bold ph-x"></i></button>
+            </div>
+            
+            <div class="space-y-4 pb-20">
+                <div class="p-4 bg-yellow-50 rounded-xl border border-yellow-200 text-xs text-yellow-800 flex gap-2">
+                    <i class="ph-bold ph-warning text-lg"></i>
+                    <span>Strictly for kids items (toys, books, events). All items are scanned by AI.</span>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1">Business Name</label>
+                    <input type="text" class="w-full p-3 bg-gray-50 rounded-lg border border-gray-200">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1">Category</label>
+                    <select class="w-full p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <option>Select Category...</option>
+                        <option>Toys & Games</option>
+                        <option>Books</option>
+                        <option>Kids Events</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-1">Description</label>
+                    <textarea class="w-full p-3 bg-gray-50 rounded-lg border border-gray-200 h-24"></textarea>
+                </div>
+
+                <button onclick="submitBusiness()" class="w-full bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg mt-4">
+                    Submit Application
+                </button>
+            </div>
+        </div>
+
+        <!-- =========================
+             VIEWS (PAGES)
+             ========================= -->
+
+        <!-- HOME VIEW -->
+        <div id="view-home" class="view-section active">
+            <div class="bg-gradient-to-r from-yellow-300 to-orange-400 p-8 rounded-b-3xl shadow-lg mb-6">
+                <h1 class="text-3xl font-black text-white">The Kid Mall</h1>
+                <p class="text-white/90">Explore, Play, Connect!</p>
+            </div>
+
+            <!-- Arcade Teaser -->
+            <div class="px-4 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">Arcade Highlights</h2>
+                    <button onclick="switchTab('arcade')" class="text-indigo-500 text-sm font-bold">Visit Floor 2 &rarr;</button>
+                </div>
+                <div class="flex gap-4 overflow-x-auto pb-4 hide-scrollbar" id="home-arcade-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Social Teaser -->
+            <div class="px-4 mb-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">Trending Clips</h2>
+                <div class="bg-purple-100 p-4 rounded-2xl flex items-center gap-4 cursor-pointer" onclick="switchTab('social')">
+                    <div class="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center text-white">
+                        <i class="ph-fill ph-play"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-purple-900">Danny just posted!</p>
+                        <p class="text-xs text-purple-600">0.2km away • 2m ago</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Store Teaser -->
+            <div class="px-4">
+                <div class="bg-green-100 rounded-2xl p-6 relative overflow-hidden cursor-pointer" onclick="switchTab('store')">
+                    <div class="relative z-10">
+                        <h2 class="text-xl font-bold text-green-900">New Toy Store!</h2>
+                        <p class="text-green-700 text-sm mb-4">Dino World is now open.</p>
+                        <span class="bg-white text-green-700 px-4 py-2 rounded-full text-xs font-bold shadow-sm">Shop Now</span>
+                    </div>
+                    <i class="ph-fill ph-storefront absolute -right-4 -bottom-4 text-green-200 text-9xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- ARCADE VIEW -->
+        <div id="view-arcade" class="view-section">
+            <div class="p-4 pt-8">
+                <h1 class="text-3xl font-black text-indigo-900 flex items-center gap-2 mb-6">
+                    <i class="ph-duotone ph-game-controller"></i> Arcade
+                </h1>
+                <div class="grid grid-cols-2 gap-4" id="arcade-grid">
+                    <!-- Populated by JS -->
+                </div>
+                
+                <div class="bg-gray-800 text-white p-6 rounded-2xl mt-8 text-center">
+                    <h3 class="font-bold text-xl text-yellow-400">Leaderboards</h3>
+                    <p class="text-gray-400 text-sm mb-4">Login to save your high scores!</p>
+                    <button onclick="checkAuth(() => alert('Leaderboard Loaded!'))" class="bg-yellow-400 text-black px-6 py-2 rounded-full font-bold">Login to Compete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STORE VIEW -->
+        <div id="view-store" class="view-section">
+            <div class="p-4 pt-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-3xl font-black text-pink-600 flex items-center gap-2">
+                        <i class="ph-duotone ph-shopping-bag"></i> Store
+                    </h1>
+                    <button onclick="checkAuth(() => document.getElementById('business-modal').classList.remove('hidden'))" class="text-xs bg-pink-100 text-pink-600 px-3 py-1 rounded-full font-bold border border-pink-200 hover:bg-pink-200">
+                        Sell Stuff
+                    </button>
+                </div>
+                
+                <div class="flex gap-2 overflow-x-auto pb-4 hide-scrollbar mb-4">
+                    <button class="px-4 py-2 bg-pink-500 text-white rounded-full text-sm font-bold">All</button>
+                    <button class="px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-bold">Toys</button>
+                    <button class="px-4 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-bold">Books</button>
+                </div>
+
+                <div class="space-y-4" id="store-list">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- SOCIAL VIEW -->
+        <div id="view-social" class="view-section">
+            <div class="pt-8 bg-gray-50 min-h-screen">
+                <!-- Social Tabs -->
+                <div class="px-4 mb-4 flex gap-6 border-b border-gray-200 pb-2">
+                    <button onclick="switchSocialTab('feed')" id="tab-btn-feed" class="text-lg font-bold text-blue-600 border-b-2 border-blue-600 pb-1">Videos</button>
+                    <button onclick="switchSocialTab('groups')" id="tab-btn-groups" class="text-lg font-bold text-gray-400 pb-1">Groups</button>
+                    <button onclick="checkAuth(() => switchSocialTab('messages'))" id="tab-btn-messages" class="text-lg font-bold text-gray-400 pb-1">Chat</button>
+                </div>
+
+                <div class="px-4 pb-20 overflow-y-auto">
+                    
+                    <!-- Feed Tab -->
+                    <div id="social-feed" class="space-y-4">
+                        <div class="flex justify-between items-center bg-blue-50 p-3 rounded-xl border border-blue-100">
+                            <span class="text-xs font-bold text-blue-800 flex items-center gap-1">
+                                <i class="ph-fill ph-map-pin"></i> Showing nearby friends first
+                            </span>
+                            <button onclick="checkAuth(() => triggerScan(() => alert('Video Uploaded!')))" class="bg-blue-600 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="ph-bold ph-plus"></i>
+                            </button>
+                        </div>
+                        <div id="feed-list" class="space-y-4"></div>
+                    </div>
+
+                    <!-- Groups Tab -->
+                    <div id="social-groups" class="hidden space-y-4">
+                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Nearby You</h3>
+                        <div id="groups-list"></div>
+                        <button onclick="checkAuth(() => alert('Need more activity XP!'))" class="w-full py-3 border-2 border-dashed border-gray-300 rounded-xl text-gray-400 font-bold hover:bg-gray-50">
+                            + Create New Group
+                        </button>
+                    </div>
+
+                    <!-- Messages Tab -->
+                    <div id="social-messages" class="hidden flex flex-col items-center justify-center pt-10 text-center">
+                        <div class="bg-gray-200 p-4 rounded-full mb-4">
+                            <i class="ph-fill ph-chat-circle-dots text-4xl text-gray-500"></i>
+                        </div>
+                        <h3 class="font-bold text-gray-700">Safe Chat</h3>
+                        <p class="text-xs text-gray-400 max-w-[200px] mb-4">Search for a user by username. Only nearby friends are shown first.</p>
+                        <div class="relative w-full">
+                            <input type="text" placeholder="Search user..." class="w-full bg-white p-3 rounded-xl border border-gray-200 text-sm">
+                            <i class="ph-bold ph-magnifying-glass absolute right-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE VIEW -->
+        <div id="view-profile" class="view-section">
+            <div class="p-4 pt-12 space-y-6 text-center" id="profile-content">
+                <!-- Content changes based on Auth State -->
+            </div>
+        </div>
+
+        <!-- BOTTOM NAVIGATION -->
+        <div class="absolute bottom-6 left-4 right-4 bg-white rounded-2xl shadow-xl border border-gray-100 flex justify-around p-3 z-30">
+            <button onclick="switchTab('home')" class="nav-btn active flex flex-col items-center text-indigo-600 transition-all" data-target="home">
+                <i class="ph-fill ph-house text-2xl mb-1"></i>
+                <span class="text-[10px] font-bold">Mall</span>
+            </button>
+            <button onclick="switchTab('store')" class="nav-btn flex flex-col items-center text-gray-400 transition-all" data-target="store">
+                <i class="ph-fill ph-shopping-bag text-2xl mb-1"></i>
+                <span class="text-[10px] font-bold">Shop</span>
+            </button>
+            <button onclick="switchTab('arcade')" class="nav-btn flex flex-col items-center text-gray-400 transition-all" data-target="arcade">
+                <i class="ph-fill ph-game-controller text-2xl mb-1"></i>
+                <span class="text-[10px] font-bold">Play</span>
+            </button>
+            <button onclick="switchTab('social')" class="nav-btn flex flex-col items-center text-gray-400 transition-all" data-target="social">
+                <i class="ph-fill ph-video text-2xl mb-1"></i>
+                <span class="text-[10px] font-bold">Social</span>
+            </button>
+            <button onclick="switchTab('profile')" class="nav-btn flex flex-col items-center text-gray-400 transition-all" data-target="profile">
+                <i class="ph-fill ph-user text-2xl mb-1"></i>
+                <span class="text-[10px] font-bold">Me</span>
+            </button>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- DATA STORE ---
+        const state = {
+            isAuthenticated: false,
+            user: null,
+            pendingAction: null
+        };
+
+        const GAMES = [
+            { id: 1, title: "Bubble Pop", type: "internal", emoji: "🎈", color: "bg-pink-100" },
+            { id: 2, title: "Math Racer", type: "internal", emoji: "🏎️", color: "bg-blue-100" },
+            { id: 3, title: "Disney Web", type: "external", emoji: "🏰", color: "bg-purple-100" },
+            { id: 4, title: "Space Jump", type: "internal", emoji: "🚀", color: "bg-indigo-100" }
+        ];
+
+        const PRODUCTS = [
+            { id: 1, name: "Wooden Blocks", price: "$25", store: "Happy Toys", category: "Toys" },
+            { id: 2, name: "Kids Yoga", price: "$10", store: "Zen Baby", category: "Events" },
+            { id: 3, name: "Dino Story", price: "$12", store: "Bookworm", category: "Books" },
+        ];
+
+        const FEED = [
+            { id: 1, user: "DannyJump", near: true, content: "Look at my jump!", likes: 120, color: "bg-orange-200" },
+            { id: 2, user: "SuzyCrafts", near: false, content: "I made a drawing.", likes: 85, color: "bg-teal-200" },
+        ];
+
+        const GROUPS = [
+            { id: 1, name: "Downtown Moms", distance: "0.5km", verified: true },
+            { id: 2, name: "LEGO Club", distance: "1.2km", verified: false },
+        ];
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderAll();
+        });
+
+        function renderAll() {
+            renderHomeArcade();
+            renderArcadeGrid();
+            renderStore();
+            renderFeed();
+            renderGroups();
+            renderProfile();
+        }
+
+        // --- NAVIGATION LOGIC ---
+        function switchTab(tabId) {
+            // Hide all views
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            // Show target view
+            document.getElementById(`view-${tabId}`).classList.add('active');
+
+            // Update Bottom Nav Styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                if(btn.dataset.target === tabId) {
+                    btn.classList.add('text-indigo-600', '-translate-y-2');
+                    btn.classList.remove('text-gray-400');
+                } else {
+                    btn.classList.remove('text-indigo-600', '-translate-y-2');
+                    btn.classList.add('text-gray-400');
+                }
+            });
+        }
+
+        function switchSocialTab(subTab) {
+            // Hide all social sub-divs
+            ['feed', 'groups', 'messages'].forEach(t => {
+                document.getElementById(`social-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`tab-btn-${t}`);
+                btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                btn.classList.add('text-gray-400');
+            });
+
+            // Show active
+            document.getElementById(`social-${subTab}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${subTab}`);
+            activeBtn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+            activeBtn.classList.remove('text-gray-400');
+        }
+
+        // --- AUTH SYSTEM ---
+        function checkAuth(callback) {
+            if (state.isAuthenticated) {
+                callback();
+            } else {
+                state.pendingAction = callback;
+                document.getElementById('auth-modal').classList.remove('hidden');
+            }
+        }
+
+        function performLogin() {
+            // Simulate API call
+            state.isAuthenticated = true;
+            state.user = { username: "KidExplorer", level: 5 };
+            
+            // Close modal
+            closeModal('auth-modal');
+            renderProfile(); // Update profile view
+
+            // Execute pending action
+            if (state.pendingAction) {
+                state.pendingAction();
+                state.pendingAction = null;
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // --- SAFETY SCANNER ---
+        function triggerScan(callback) {
+            const scanner = document.getElementById('safety-scanner');
+            const loading = document.getElementById('scan-loading');
+            const success = document.getElementById('scan-success');
+
+            scanner.classList.remove('hidden');
+            loading.classList.remove('hidden');
+            success.classList.add('hidden');
+
+            // Simulate 1.5s scan
+            setTimeout(() => {
+                loading.classList.add('hidden');
+                success.classList.remove('hidden');
+                
+                // Close after success
+                setTimeout(() => {
+                    scanner.classList.add('hidden');
+                    callback();
+                }, 800);
+            }, 1500);
+        }
+
+        function submitBusiness() {
+            triggerScan(() => {
+                alert("Application Sent! Our human team will review it.");
+                closeModal('business-modal');
+            });
+        }
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderHomeArcade() {
+            const container = document.getElementById('home-arcade-list');
+            container.innerHTML = GAMES.map(g => `
+                <div class="${g.color} min-w-[120px] h-32 rounded-2xl flex flex-col items-center justify-center shadow-sm">
+                    <span class="text-4xl mb-2">${g.emoji}</span>
+                    <span class="font-bold text-sm text-gray-700">${g.title}</span>
+                </div>
+            `).join('');
+        }
+
+        function renderArcadeGrid() {
+            const container = document.getElementById('arcade-grid');
+            container.innerHTML = GAMES.map(g => `
+                <div class="${g.color} p-4 rounded-2xl shadow-md border-b-4 border-black/10 relative overflow-hidden active:scale-95 transition-transform">
+                    ${g.type === 'external' ? '<span class="absolute top-2 right-2 bg-black/10 text-[10px] px-2 py-1 rounded font-bold">EXT</span>' : ''}
+                    <div class="h-20 flex items-center justify-center text-5xl">${g.emoji}</div>
+                    <h3 class="font-bold text-gray-800 mt-2">${g.title}</h3>
+                    <div class="flex gap-2 mt-3">
+                        <button class="flex-1 bg-white/50 rounded-lg py-1 text-xs font-bold">Play</button>
+                        <button onclick="checkAuth(() => alert('Saved to Favorites!'))" class="bg-black/10 rounded-lg p-1 w-8 flex justify-center items-center">
+                            <i class="ph-bold ph-heart"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderStore() {
+            const container = document.getElementById('store-list');
+            container.innerHTML = PRODUCTS.map(p => `
+                <div class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm flex items-center gap-4">
+                    <div class="w-16 h-16 bg-gray-200 rounded-xl"></div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800">${p.name}</h3>
+                        <p class="text-xs text-gray-500">${p.store}</p>
+                        <p class="font-black text-pink-600">${p.price}</p>
+                    </div>
+                    <button onclick="checkAuth(() => alert('Added ${p.name} to cart!'))" class="bg-pink-500 text-white px-4 py-2 rounded-lg text-sm font-bold active:scale-95">
+                        Add
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderFeed() {
+            const container = document.getElementById('feed-list');
+            container.innerHTML = FEED.map(p => `
+                <div class="${p.color} h-64 rounded-3xl relative p-4 flex flex-col justify-end shadow-md">
+                    <div class="absolute top-4 left-4 flex items-center gap-2">
+                        <div class="w-8 h-8 bg-white rounded-full"></div>
+                        <div class="bg-black/20 backdrop-blur-md px-2 py-1 rounded-lg text-white text-xs font-bold">@${p.user}</div>
+                        ${p.near ? '<span class="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1"><i class="ph-fill ph-map-pin"></i> Nearby</span>' : ''}
+                    </div>
+                    <p class="text-gray-800 font-medium mb-2">${p.content}</p>
+                    <div class="flex gap-2">
+                        <button onclick="checkAuth(() => {})" class="bg-white/80 px-3 py-2 rounded-full flex items-center gap-1 text-xs font-bold">
+                            <i class="ph-fill ph-heart text-red-500"></i> ${p.likes}
+                        </button>
+                        <button onclick="checkAuth(() => {})" class="bg-white/80 px-3 py-2 rounded-full flex items-center gap-1 text-xs font-bold">Follow</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderGroups() {
+            const container = document.getElementById('groups-list');
+            container.innerHTML = GROUPS.map(g => `
+                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm mb-3 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-gray-800 flex items-center gap-1">
+                            ${g.name} 
+                            ${g.verified ? '<i class="ph-fill ph-check-circle text-blue-500"></i>' : ''}
+                        </h4>
+                        <p class="text-xs text-green-600 font-bold flex items-center gap-1">
+                            <i class="ph-fill ph-map-pin"></i> ${g.distance}
+                        </p>
+                    </div>
+                    <button onclick="checkAuth(() => {})" class="px-4 py-2 bg-blue-100 text-blue-600 font-bold text-xs rounded-lg">Join</button>
+                </div>
+            `).join('');
+        }
+
+        function renderProfile() {
+            const container = document.getElementById('profile-content');
+            if (state.isAuthenticated) {
+                container.innerHTML = `
+                    <div class="flex items-center gap-4 text-left justify-center">
+                        <div class="w-20 h-20 bg-yellow-400 rounded-full border-4 border-white shadow-lg"></div>
+                        <div>
+                            <h2 class="text-2xl font-black text-gray-800">${state.user.username}</h2>
+                            <p class="text-sm text-gray-500">Junior Explorer</p>
+                            <span class="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded">Level ${state.user.level}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Points</h3>
+                            <p class="text-2xl font-black text-indigo-600">1,240</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                            <h3 class="text-gray-400 text-xs font-bold uppercase">Friends</h3>
+                            <p class="text-2xl font-black text-indigo-600">12</p>
+                        </div>
+                    </div>
+                    <div class="bg-indigo-50 p-6 rounded-2xl text-left">
+                        <h3 class="font-bold text-indigo-900 mb-2">My Business</h3>
+                        <p class="text-sm text-indigo-700 mb-4">You haven't set up a shop yet.</p>
+                        <button onclick="document.getElementById('business-modal').classList.remove('hidden')" class="w-full bg-indigo-600 text-white py-2 rounded-xl font-bold text-sm">Start Selling</button>
+                    </div>
+                    <button onclick="window.location.reload()" class="text-red-400 text-xs font-bold mt-4">Logout</button>
+                `;
+            } else {
+                container.innerHTML = `
+                    <div class="w-24 h-24 bg-gray-200 rounded-full mx-auto mb-4 flex items-center justify-center">
+                        <i class="ph-fill ph-user text-4xl text-gray-400"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">Guest Visitor</h2>
+                    <p class="text-gray-500 mb-6 text-sm">Login to track your high scores, chat with friends, and buy toys!</p>
+                    <button onclick="checkAuth(() => {})" class="bg-indigo-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg">Login Now</button>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
