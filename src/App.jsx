@@ -99,16 +99,30 @@ function HomeContent() {
   );
 }
 
+// Replace only the GameCard component in src/App.jsx with this updated version
+
 function GameCard({ id, title }) {
   const { requireAuth } = useInteraction();
 
-  async function handleJoin() {
+  // Play is available to everyone (guest or signed-in)
+  function handlePlay() {
+    // Replace with actual game-launch logic
+    alert(`Starting ${title} — enjoy! (no sign-in required)`);
+  }
+
+  // Saving a score requires authentication
+  async function handleSaveScore() {
     const user = await requireAuth();
     if (!user) {
-      // user cancelled/didn't sign in
-      return;
+      // user cancelled/didn't authenticate
+      return alert("Sign in to save your score and appear on the leaderboard.");
     }
-    alert(`${user.email} joined ${title}!`);
+
+    // Proceed with saving score / leaderboard logic
+    // Example placeholder:
+    const fakeScore = Math.floor(Math.random() * 1000);
+    alert(`${user.email} saved a score of ${fakeScore} for ${title}!`);
+    // TODO: call your API / firestore to persist the score
   }
 
   return (
@@ -121,10 +135,11 @@ function GameCard({ id, title }) {
       }}
     >
       <div style={{ fontWeight: 800 }}>{title}</div>
-      <div style={{ marginTop: 8 }}>
+      <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
         <button
-          onClick={handleJoin}
+          onClick={handlePlay}
           style={{
+            flex: 1,
             padding: "8px 10px",
             borderRadius: 8,
             background: "#7c5cff",
@@ -134,6 +149,19 @@ function GameCard({ id, title }) {
           }}
         >
           Play
+        </button>
+        <button
+          onClick={handleSaveScore}
+          style={{
+            padding: "8px 10px",
+            borderRadius: 8,
+            background: "#ffd670",
+            color: "#000",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          Save Score
         </button>
       </div>
     </div>
