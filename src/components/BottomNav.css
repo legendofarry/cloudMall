@@ -1,0 +1,85 @@
+/* src/components/BottomNav.css */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 14000;
+  width: min(960px, calc(100% - 32px));
+  display: flex;
+  justify-content: center;
+  pointer-events: auto;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-inner {
+  display: flex;
+  gap: 6px;
+  background-color: #fff;
+  padding: 8px;
+  border-radius: 999px;
+  box-shadow: 0 12px 40px rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  justify-content: space-between;
+  width: 100%;
+  max-width: 520px;
+  align-items: center;
+}
+
+.nav-item {
+  background: transparent;
+  border: none;
+  color: rgba(234, 240, 255, 0.9);
+  padding: 8px 12px;
+  border-radius: 999px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  min-width: 64px;
+  transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+
+.nav-item .nav-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.nav-item .nav-label {
+  opacity: 0.9;
+  font-size: 0.72rem;
+  color: #cfd8ff;
+}
+
+.nav-item:hover {
+  transform: translateY(-4px);
+  background: linear-gradient(
+    90deg,
+    rgba(124, 92, 255, 0.08),
+    rgba(255, 122, 182, 0.06)
+  );
+}
+
+.nav-item.active {
+  background: linear-gradient(90deg, #7c5cff, #ff7ab6);
+  color: white;
+  box-shadow: 0 14px 40px rgba(124, 92, 255, 0.16);
+}
+
+@media (max-width: 560px) {
+  .bottom-nav-inner {
+    padding: 6px;
+    gap: 4px;
+  }
+  .nav-item {
+    padding: 8px 10px;
+    min-width: 56px;
+  }
+  .nav-item .nav-label {
+    display: none;
+  }
+}

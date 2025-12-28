@@ -1,17 +1,20 @@
 // src/App.jsx
 import { useEffect, useState } from "react";
-import { useAuth } from "./context/AuthContext";
 import {
   InteractionProvider,
   useInteraction,
 } from "./context/InteractionContext";
 import MallMapModal from "./components/MallMapModal";
+import BottomNav from "./components/BottomNav";
+import { useAuth } from "./context/AuthContext";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./firebase/firestore";
 import "./index.css";
+import "./components/BottomNav.css";
 
 /*
-  App: browse-first homepage. Interactive actions call requireAuth() to prompt auth modal.
+  Updated App: includes BottomNav.
+  Sections have ids ("games", "shops") so the bottom nav can scroll to them.
 */
 
 function HomeContent() {
@@ -58,71 +61,211 @@ function HomeContent() {
         />
       )}
 
-      <main style={{ padding: "2rem" }}>
-        <h2 style={{ marginTop: 0 }}>CloudMall — Welcome</h2>
-        <p>
-          Browse shops, watch demo games and walk around the mall without
-          signing in.
-        </p>
+      <main
+        style={{
+          padding: "2rem",
+          paddingBottom: "140px",
+          backgroundColor: "#E0F7FA", // Light sky blue background
+          backgroundImage:
+            "radial-gradient(#4DD0E1 10%, transparent 11%), radial-gradient(#4DD0E1 10%, transparent 11%)",
+          backgroundSize: "60px 60px",
+          backgroundPosition: "0 0, 30px 30px", // Polka dot pattern
+          fontFamily: "'Comic Neue', 'Nunito', sans-serif", // Suggesting a round font
+          minHeight: "100vh",
+        }}
+      >
+        {/* HERO SECTION: The Mall Entrance */}
+        <section
+          id="hero"
+          style={{
+            marginBottom: 32,
+            textAlign: "center",
+            backgroundColor: "#FFFFFF",
+            borderRadius: "30px",
+            padding: "2rem",
+            border: "5px solid #FF6B6B", // Salmon pink border
+            boxShadow: "0 8px 0 #FF6B6B", // 3D cartoon shadow effect
+            position: "relative",
+          }}
+        >
+          {/* Decorative "Sign" hanging effect */}
+          <div
+            style={{
+              position: "absolute",
+              top: -15,
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: 100,
+              height: 15,
+              background: "rgba(0,0,0,0.1)",
+              borderRadius: 10,
+            }}
+          ></div>
 
-        <section style={{ marginTop: "1.5rem" }}>
-          <h3>Featured games</h3>
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            <GameCard id="g1" title="Balloon Pop" />
-            <GameCard id="g2" title="Color Match" />
-            <GameCard id="g3" title="Mini Racer" />
+          <h1
+            style={{
+              margin: 0,
+              fontSize: "2.5rem",
+              color: "#FF6B6B",
+              textTransform: "uppercase",
+              letterSpacing: "2px",
+              textShadow: "2px 2px 0px #FFD93D", // Yellow shadow
+            }}
+          >
+            🎈 CloudMall
+          </h1>
+          <p
+            style={{
+              color: "#546E7A",
+              fontSize: "1.1rem",
+              fontWeight: "bold",
+              marginTop: "10px",
+              lineHeight: "1.4",
+            }}
+          >
+            Welcome to the fun zone! 🏃‍♂️💨 <br />
+            Explore, play, and collect cool stuff!
+          </p>
+        </section>
+
+        {/* GAMES SECTION: The Arcade Floor */}
+        <section
+          id="games"
+          style={{
+            marginTop: "2rem",
+            backgroundColor: "#FFF9C4", // Light Yellow
+            padding: "1.5rem",
+            borderRadius: "25px",
+            border: "4px dashed #FBC02D",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginBottom: "1rem",
+            }}
+          >
+            <span style={{ fontSize: "2rem" }}>🕹️</span>
+            <h2 style={{ margin: 0, color: "#F57F17", fontSize: "1.5rem" }}>
+              Arcade Zone
+            </h2>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "1rem",
+              flexWrap: "wrap",
+              justifyContent: "center", // Center cards for better mobile look
+            }}
+          >
+            {/* Note: Ensure your GameCard components have rounded corners and shadows to match! */}
+            <GameCard id="g1" title="Balloon Pop 🎈" />
+            <GameCard id="g2" title="Color Match 🎨" />
+            <GameCard id="g3" title="Mini Racer 🏎️" />
           </div>
         </section>
 
-        <section style={{ marginTop: "1.5rem" }}>
-          <h3>Shops</h3>
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            <ShopCard name="Toy Hub" />
-            <ShopCard name="Arcade Corner" />
-            <ShopCard name="Snack Bar" />
+        {/* SHOPS SECTION: The Shopping Avenue */}
+        <section
+          id="shops"
+          style={{
+            marginTop: "2rem",
+            backgroundColor: "#F3E5F5", // Light Purple
+            padding: "1.5rem",
+            borderRadius: "25px",
+            border: "4px solid #AB47BC",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginBottom: "1rem",
+            }}
+          >
+            <span style={{ fontSize: "2rem" }}>🛍️</span>
+            <h2 style={{ margin: 0, color: "#8E24AA", fontSize: "1.5rem" }}>
+              Shopping Ave
+            </h2>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              gap: "1rem",
+              flexWrap: "wrap",
+              justifyContent: "center",
+            }}
+          >
+            <ShopCard name="Toy Hub 🧸" />
+            <ShopCard name="Arcade Corner 🎟️" />
+            <ShopCard name="Snack Bar 🍿" />
           </div>
         </section>
 
-        <div style={{ marginTop: 24 }}>
-          {user ? (
-            <div>
-              <strong>Signed in as:</strong> {user.email}
-            </div>
-          ) : (
-            <div style={{ color: "#9fa8d6" }}>
-              You are browsing as a guest — sign in when you want to interact.
-            </div>
-          )}
-        </div>
+        {/* AUTH SECTION: The Visitor Badge */}
+        <section
+          style={{
+            marginTop: 40,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "15px 30px",
+              borderRadius: "50px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              border: "2px solid #4DD0E1",
+            }}
+          >
+            {user ? (
+              <div style={{ color: "#00838F", fontWeight: "bold" }}>
+                <span style={{ marginRight: 8 }}>😎</span>
+                VIP Member: {user.email}
+              </div>
+            ) : (
+              <div style={{ color: "#00838F", textAlign: "center" }}>
+                <span
+                  style={{ display: "block", fontSize: "0.9rem", opacity: 0.8 }}
+                >
+                  👾 Guest Pass
+                </span>
+                <span style={{ fontWeight: "bold" }}>
+                  Tap Profile to join the club!
+                </span>
+              </div>
+            )}
+          </div>
+        </section>
       </main>
+
+      <BottomNav />
     </>
   );
 }
 
-// Replace only the GameCard component in src/App.jsx with this updated version
-
 function GameCard({ id, title }) {
   const { requireAuth } = useInteraction();
 
-  // Play is available to everyone (guest or signed-in)
   function handlePlay() {
-    // Replace with actual game-launch logic
     alert(`Starting ${title} — enjoy! (no sign-in required)`);
   }
 
-  // Saving a score requires authentication
   async function handleSaveScore() {
     const user = await requireAuth();
-    if (!user) {
-      // user cancelled/didn't authenticate
+    if (!user)
       return alert("Sign in to save your score and appear on the leaderboard.");
-    }
-
-    // Proceed with saving score / leaderboard logic
-    // Example placeholder:
     const fakeScore = Math.floor(Math.random() * 1000);
     alert(`${user.email} saved a score of ${fakeScore} for ${title}!`);
-    // TODO: call your API / firestore to persist the score
   }
 
   return (
@@ -161,7 +304,7 @@ function GameCard({ id, title }) {
             cursor: "pointer",
           }}
         >
-          Save Score
+          Save
         </button>
       </div>
     </div>
@@ -173,9 +316,7 @@ function ShopCard({ name }) {
 
   async function handleFavorite() {
     const user = await requireAuth();
-    if (!user) {
-      return;
-    }
+    if (!user) return;
     alert(`${user.email} favorited ${name}!`);
   }
 
@@ -209,6 +350,8 @@ function ShopCard({ name }) {
 }
 
 export default function App() {
+  // The InteractionProvider is expected to be wired in src/main.jsx around <App />
+  // but if it's not, wrap here:
   return (
     <InteractionProvider>
       <HomeContent />
