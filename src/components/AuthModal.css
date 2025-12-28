@@ -1,0 +1,41 @@
+/* src/components/AuthModal.css */
+
+.auth-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 12000;
+  display: grid;
+  place-items: center;
+  background: rgba(2, 6, 23, 0.6);
+  padding: 2rem;
+}
+
+.auth-modal-card {
+  width: min(920px, 96%);
+  max-width: 820px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02),
+    rgba(255, 255, 255, 0.01)
+  );
+  border-radius: 14px;
+  padding: 1rem;
+  position: relative;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.auth-modal-close {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  background: transparent;
+  border: none;
+  color: #eaf0ff;
+  font-size: 1.15rem;
+  cursor: pointer;
+}
+
+.auth-modal-content {
+  padding-top: 1.25rem;
+}

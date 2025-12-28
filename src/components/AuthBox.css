@@ -1,0 +1,371 @@
+/* src/components/AuthBox.css */
+:root {
+  --bg-1: linear-gradient(135deg, #0f1724 0%, #13263b 40%, #0f1b2b 100%);
+  --card-bg: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03),
+    rgba(255, 255, 255, 0.01)
+  );
+  --accent: #7c5cff;
+  --accent-2: #ff7ab6;
+  --glass: rgba(255, 255, 255, 0.04);
+  --muted: #bfc7d6;
+  --danger: #ff5c6c;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial;
+}
+
+/* Full-screen playful backdrop */
+.mall-entrance {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 3rem 1rem;
+  background: radial-gradient(
+      1200px 600px at 10% 20%,
+      rgba(124, 92, 255, 0.08),
+      transparent 6%
+    ),
+    radial-gradient(
+      900px 400px at 95% 60%,
+      rgba(255, 122, 182, 0.06),
+      transparent 6%
+    ),
+    var(--bg-1);
+  color: #eaf0ff;
+  overflow: hidden;
+}
+
+/* background shop signs to feel like a mall corridor */
+.mall-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 4rem;
+  gap: 1rem;
+  opacity: 0.12;
+}
+.shop-sign {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06),
+    rgba(255, 255, 255, 0.02)
+  );
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  transform: translateY(0);
+  animation: float 6s ease-in-out infinite;
+}
+.shop-sign.left {
+  animation-delay: 0s;
+}
+.shop-sign.center {
+  animation-delay: 1s;
+}
+.shop-sign.right {
+  animation-delay: 2s;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* The main card */
+.entrance-card {
+  position: relative;
+  z-index: 2;
+  width: min(960px, 96%);
+  max-width: 920px;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.5rem;
+  background: var(--card-bg);
+  border-radius: 18px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  overflow: hidden;
+}
+
+/* Left "mall corridor" visual (we keep it decorative) */
+.entrance-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 55%;
+  background: linear-gradient(90deg, rgba(124, 92, 255, 0.06), transparent 40%);
+  pointer-events: none;
+  transform: skewX(-6deg);
+  filter: blur(12px);
+  mix-blend-mode: screen;
+}
+
+/* Header and left side */
+.entrance-header {
+  grid-column: 1 / 2;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.logo-arc {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.logo-dot {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--accent), var(--accent-2));
+  box-shadow: 0 6px 18px rgba(124, 92, 255, 0.28);
+  transform-origin: center;
+  animation: bounce 1.6s infinite ease-in-out;
+}
+.logo-dot:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.logo-dot:nth-child(3) {
+  animation-delay: 0.1s;
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-8px) scale(1.05);
+  }
+}
+
+.title {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #fff;
+  text-shadow: 0 6px 22px rgba(0, 0, 0, 0.6);
+}
+.tagline {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* Right side: the actual form area */
+.auth-form {
+  grid-column: 2 / 3;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  min-width: 260px;
+}
+
+/* Tab row */
+.tab-row {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem 0 1rem;
+}
+.tab {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  transition: all 0.22s ease;
+}
+.tab.active {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: white;
+  box-shadow: 0 8px 30px rgba(124, 92, 255, 0.18);
+  transform: translateY(-2px);
+}
+
+/* Fields */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.field-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.input {
+  background: var(--glass);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: #fff;
+  padding: 0.7rem 0.9rem;
+  border-radius: 12px;
+  font-size: 0.98rem;
+  outline: none;
+  transition: box-shadow 0.18s, border-color 0.18s;
+}
+.input:focus {
+  box-shadow: 0 6px 24px rgba(124, 92, 255, 0.12);
+  border-color: rgba(124, 92, 255, 0.6);
+}
+
+/* Pin section */
+.pin-section {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+.pin-button {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: white;
+  border: none;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(124, 92, 255, 0.14);
+}
+.pin-hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.pinned {
+  color: #dff6e0;
+  font-weight: 700;
+}
+.unpinned {
+  color: #ffd7e8;
+}
+
+/* Error */
+.error {
+  background: rgba(255, 92, 108, 0.08);
+  border: 1px solid rgba(255, 92, 108, 0.12);
+  color: var(--danger);
+  padding: 0.6rem 0.8rem;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+.primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  color: white;
+  border: none;
+  padding: 0.85rem 1rem;
+  border-radius: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 12px 36px rgba(124, 92, 255, 0.16);
+}
+.primary[disabled] {
+  opacity: 0.65;
+  cursor: default;
+  transform: none;
+}
+.ghost {
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  padding: 0.55rem 0.7rem;
+  cursor: pointer;
+}
+
+/* Footer decorative lights */
+.entrance-footer {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 0.6rem 1rem 1.1rem 1rem;
+}
+.floor-lights {
+  display: flex;
+  gap: 0.6rem;
+}
+.floor-lights .light {
+  width: 10px;
+  height: 6px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(124, 92, 255, 0.9),
+    rgba(255, 122, 182, 0.8)
+  );
+  filter: blur(6px);
+  opacity: 0.9;
+  animation: pulse 1.6s infinite ease-in-out;
+}
+.floor-lights .light:nth-child(2) {
+  animation-delay: 0.12s;
+}
+.floor-lights .light:nth-child(3) {
+  animation-delay: 0.24s;
+}
+.floor-lights .light:nth-child(4) {
+  animation-delay: 0.36s;
+}
+.floor-lights .light:nth-child(5) {
+  animation-delay: 0.48s;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scaleX(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scaleX(1.6);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 0.6;
+  }
+}
+
+/* Responsive */
+@media (max-width: 880px) {
+  .entrance-card {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .auth-form {
+    grid-column: 1 / -1;
+  }
+  .entrance-header {
+    padding: 1rem;
+    text-align: center;
+  }
+  .tab-row {
+    justify-content: center;
+  }
+}
