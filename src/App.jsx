@@ -1,360 +1,381 @@
-// src/App.jsx
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  InteractionProvider,
-  useInteraction,
-} from "./context/InteractionContext";
-import MallMapModal from "./components/MallMapModal";
-import BottomNav from "./components/BottomNav";
-import { useAuth } from "./context/AuthContext";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "./firebase/firestore";
-import "./index.css";
-import "./components/BottomNav.css";
+  Play,
+  Gamepad2,
+  Rocket,
+  Star,
+  Trophy,
+  ArrowLeft,
+  X,
+} from "lucide-react";
+import { Canvas } from "@react-three/fiber";
+import { OrbitControls, Environment } from "@react-three/drei";
+import VoodooModel from "./components/VoodooModel";
 
-/*
-  Updated App: includes BottomNav.
-  Sections have ids ("games", "shops") so the bottom nav can scroll to them.
-*/
-
-function HomeContent() {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState(null);
-  const [showOnboarding, setShowOnboarding] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-    async function fetchProfile() {
-      if (!user) {
-        setProfile(null);
-        setShowOnboarding(false);
-        return;
-      }
-      try {
-        const ref = doc(db, "users", user.uid);
-        const snap = await getDoc(ref);
-        const data = snap.exists() ? snap.data() : null;
-        if (!mounted) return;
-        setProfile(data);
-        if (data && data.onboardingComplete !== true) {
-          setShowOnboarding(true);
-        } else {
-          setShowOnboarding(false);
-        }
-      } catch (err) {
-        console.error("Failed to fetch user profile", err);
-      }
-    }
-    fetchProfile();
-    return () => {
-      mounted = false;
-    };
-  }, [user]);
-
-  return (
-    <>
-      {showOnboarding && user && (
-        <MallMapModal
-          open={showOnboarding}
-          uid={user.uid}
-          onClose={() => setShowOnboarding(false)}
-        />
-      )}
-
-      <main
-        style={{
-          padding: "2rem",
-          paddingBottom: "140px",
-          backgroundColor: "#E0F7FA", // Light sky blue background
-          backgroundImage:
-            "radial-gradient(#4DD0E1 10%, transparent 11%), radial-gradient(#4DD0E1 10%, transparent 11%)",
-          backgroundSize: "60px 60px",
-          backgroundPosition: "0 0, 30px 30px", // Polka dot pattern
-          fontFamily: "'Comic Neue', 'Nunito', sans-serif", // Suggesting a round font
-          minHeight: "100vh",
-        }}
-      >
-        {/* HERO SECTION: The Mall Entrance */}
-        <section
-          id="hero"
-          style={{
-            marginBottom: 32,
-            textAlign: "center",
-            backgroundColor: "#FFFFFF",
-            borderRadius: "30px",
-            padding: "2rem",
-            border: "5px solid #FF6B6B", // Salmon pink border
-            boxShadow: "0 8px 0 #FF6B6B", // 3D cartoon shadow effect
-            position: "relative",
-          }}
-        >
-          {/* Decorative "Sign" hanging effect */}
-          <div
-            style={{
-              position: "absolute",
-              top: -15,
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: 100,
-              height: 15,
-              background: "rgba(0,0,0,0.1)",
-              borderRadius: 10,
-            }}
-          ></div>
-
-          <h1
-            style={{
-              margin: 0,
-              fontSize: "2.5rem",
-              color: "#FF6B6B",
-              textTransform: "uppercase",
-              letterSpacing: "2px",
-              textShadow: "2px 2px 0px #FFD93D", // Yellow shadow
-            }}
-          >
-            🎈 CloudMall
-          </h1>
-          <p
-            style={{
-              color: "#546E7A",
-              fontSize: "1.1rem",
-              fontWeight: "bold",
-              marginTop: "10px",
-              lineHeight: "1.4",
-            }}
-          >
-            Welcome to the fun zone! 🏃‍♂️💨 <br />
-            Explore, play, and collect cool stuff!
-          </p>
-        </section>
-
-        {/* GAMES SECTION: The Arcade Floor */}
-        <section
-          id="games"
-          style={{
-            marginTop: "2rem",
-            backgroundColor: "#FFF9C4", // Light Yellow
-            padding: "1.5rem",
-            borderRadius: "25px",
-            border: "4px dashed #FBC02D",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "1rem",
-            }}
-          >
-            <span style={{ fontSize: "2rem" }}>🕹️</span>
-            <h2 style={{ margin: 0, color: "#F57F17", fontSize: "1.5rem" }}>
-              Arcade Zone
-            </h2>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              flexWrap: "wrap",
-              justifyContent: "center", // Center cards for better mobile look
-            }}
-          >
-            {/* Note: Ensure your GameCard components have rounded corners and shadows to match! */}
-            <GameCard id="g1" title="Balloon Pop 🎈" />
-            <GameCard id="g2" title="Color Match 🎨" />
-            <GameCard id="g3" title="Mini Racer 🏎️" />
-          </div>
-        </section>
-
-        {/* SHOPS SECTION: The Shopping Avenue */}
-        <section
-          id="shops"
-          style={{
-            marginTop: "2rem",
-            backgroundColor: "#F3E5F5", // Light Purple
-            padding: "1.5rem",
-            borderRadius: "25px",
-            border: "4px solid #AB47BC",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "1rem",
-            }}
-          >
-            <span style={{ fontSize: "2rem" }}>🛍️</span>
-            <h2 style={{ margin: 0, color: "#8E24AA", fontSize: "1.5rem" }}>
-              Shopping Ave
-            </h2>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              gap: "1rem",
-              flexWrap: "wrap",
-              justifyContent: "center",
-            }}
-          >
-            <ShopCard name="Toy Hub 🧸" />
-            <ShopCard name="Arcade Corner 🎟️" />
-            <ShopCard name="Snack Bar 🍿" />
-          </div>
-        </section>
-
-        {/* AUTH SECTION: The Visitor Badge */}
-        <section
-          style={{
-            marginTop: 40,
-            display: "flex",
-            justifyContent: "center",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              padding: "15px 30px",
-              borderRadius: "50px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              border: "2px solid #4DD0E1",
-            }}
-          >
-            {user ? (
-              <div style={{ color: "#00838F", fontWeight: "bold" }}>
-                <span style={{ marginRight: 8 }}>😎</span>
-                VIP Member: {user.email}
-              </div>
-            ) : (
-              <div style={{ color: "#00838F", textAlign: "center" }}>
-                <span
-                  style={{ display: "block", fontSize: "0.9rem", opacity: 0.8 }}
-                >
-                  👾 Guest Pass
-                </span>
-                <span style={{ fontWeight: "bold" }}>
-                  Tap Profile to join the club!
-                </span>
-              </div>
-            )}
-          </div>
-        </section>
-      </main>
-
-      <BottomNav />
-    </>
-  );
-}
-
-function GameCard({ id, title }) {
-  const { requireAuth } = useInteraction();
-
-  function handlePlay() {
-    alert(`Starting ${title} — enjoy! (no sign-in required)`);
-  }
-
-  async function handleSaveScore() {
-    const user = await requireAuth();
-    if (!user)
-      return alert("Sign in to save your score and appear on the leaderboard.");
-    const fakeScore = Math.floor(Math.random() * 1000);
-    alert(`${user.email} saved a score of ${fakeScore} for ${title}!`);
-  }
-
-  return (
-    <div
-      style={{
-        width: 220,
-        padding: 12,
-        borderRadius: 12,
-        background: "rgba(255,255,255,0.02)",
-      }}
-    >
-      <div style={{ fontWeight: 800 }}>{title}</div>
-      <div style={{ marginTop: 8, display: "flex", gap: 8 }}>
-        <button
-          onClick={handlePlay}
-          style={{
-            flex: 1,
-            padding: "8px 10px",
-            borderRadius: 8,
-            background: "#7c5cff",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Play
-        </button>
-        <button
-          onClick={handleSaveScore}
-          style={{
-            padding: "8px 10px",
-            borderRadius: 8,
-            background: "#ffd670",
-            color: "#000",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Save
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function ShopCard({ name }) {
-  const { requireAuth } = useInteraction();
-
-  async function handleFavorite() {
-    const user = await requireAuth();
-    if (!user) return;
-    alert(`${user.email} favorited ${name}!`);
-  }
-
-  return (
-    <div
-      style={{
-        width: 220,
-        padding: 12,
-        borderRadius: 12,
-        background: "rgba(255,255,255,0.02)",
-      }}
-    >
-      <div style={{ fontWeight: 800 }}>{name}</div>
-      <div style={{ marginTop: 8 }}>
-        <button
-          onClick={handleFavorite}
-          style={{
-            padding: "8px 10px",
-            borderRadius: 8,
-            background: "#ff7ab6",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          Favorite
-        </button>
-      </div>
-    </div>
-  );
-}
+// --- Game Data Configuration ---
+const GAMES = [
+  {
+    id: 1,
+    title: "Fix IT",
+    folder: "Hangman",
+    entry: "index.html", // /games/Hangman/index.html
+    thumbnail:
+      "https://images.unsplash.com/photo-1614732414444-096e5f1122d5?w=400&h=250&fit=crop",
+    gradient: "linear-gradient(135deg, #a855f7 0%, #2563eb 100%)",
+    icon: <Rocket size={24} />,
+  },
+  {
+    id: 2,
+    title: "Taptap",
+    folder: "Taptap",
+    entry: "play/index.html", // /games/Taptap/play/index.html
+    thumbnail:
+      "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=400&h=250&fit=crop",
+    gradient: "linear-gradient(135deg, #4ade80 0%, #059669 100%)",
+    icon: <Star size={24} />,
+  },
+  {
+    id: 3,
+    title: "City Racer",
+    folder: "city-racer",
+    entry: "index.html", // /games/city-racer/index.html
+    thumbnail:
+      "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=250&fit=crop",
+    gradient: "linear-gradient(135deg, #fb923c 0%, #dc2626 100%)",
+    icon: <Trophy size={24} />,
+  },
+  {
+    id: 4,
+    title: "Archer",
+    folder: "archer",
+    entry: "/index.html", // /games/archer/index.html
+    thumbnail:
+      "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400&h=250&fit=crop",
+    gradient: "linear-gradient(135deg, #22d3ee 0%, #2563eb 100%)",
+    icon: <Gamepad2 size={24} />,
+  },
+];
 
 export default function App() {
-  // The InteractionProvider is expected to be wired in src/main.jsx around <App />
-  // but if it's not, wrap here:
+  const [view, setView] = useState("landing"); // landing | browse
+  const [activeGame, setActiveGame] = useState(null); // iframe src
+
+  const handlePlayGame = (game) => {
+    setActiveGame(`/games/${game.folder}/${game.entry}`);
+  };
+
+  const closeGame = () => {
+    setActiveGame(null);
+  };
+
   return (
-    <InteractionProvider>
-      <HomeContent />
-    </InteractionProvider>
+    <div style={styles.appContainer}>
+      {/* ---------- GAME IFRAME ---------- */}
+      {activeGame && (
+        <div style={styles.gameOverlay}>
+          <button onClick={closeGame} style={styles.closeGameBtn}>
+            <X size={28} />
+            Exit Game
+          </button>
+
+          <iframe
+            src={activeGame}
+            title="Game"
+            style={styles.gameIframe}
+            sandbox="allow-scripts allow-same-origin allow-pointer-lock"
+          />
+        </div>
+      )}
+
+      {/* ---------- MAIN UI ---------- */}
+      <AnimatePresence mode="wait">
+        {view === "landing" ? (
+          <LandingScreen key="landing" onStart={() => setView("browse")} />
+        ) : (
+          <GameBrowser
+            key="browse"
+            onBack={() => setView("landing")}
+            onPlay={handlePlayGame}
+          />
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
+
+// ---------- Landing Screen ----------
+function LandingScreen({ onStart }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      style={styles.landingWrapper}
+    >
+      <div style={styles.heroSection}>
+        <div style={styles.characterContainer}>
+          <Canvas camera={{ position: [4, 1.8, 4.5], fov: 40 }}>
+            <ambientLight intensity={1.2} />
+            <directionalLight position={[5, 5, 5]} />
+            <Environment preset="city" />
+            <VoodooModel />
+            <OrbitControls enableZoom={false} />
+          </Canvas>
+        </div>
+      </div>
+
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={onStart}
+        style={styles.startBtn}
+      >
+        <div style={styles.playIconCircle}>
+          <Play fill="white" size={24} />
+        </div>
+        <span style={styles.startBtnText}>START PLAYING</span>
+      </motion.button>
+    </motion.div>
+  );
+}
+
+// ---------- Game Browser ----------
+function GameBrowser({ onBack, onPlay }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 50 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -50 }}
+      style={styles.browserContainer}
+    >
+      <header style={styles.header}>
+        <div>
+          <button onClick={onBack} style={styles.backBtn}>
+            <ArrowLeft size={18} /> Back to Home
+          </button>
+          <h1 style={styles.browserTitle}>GAME ARCADE</h1>
+        </div>
+        <div style={styles.pointsBadge}>
+          <Trophy size={20} color="#fde047" />
+          <span style={{ fontWeight: "bold" }}>1,250 PTS</span>
+        </div>
+      </header>
+
+      <div style={styles.gameGrid}>
+        {GAMES.map((game, index) => (
+          <motion.div
+            key={game.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.1 }}
+            whileHover={{ y: -10 }}
+            style={styles.gameCard}
+            onClick={() => onPlay(game)} // ← pass game object now
+          >
+            <div style={styles.thumbnailWrapper}>
+              <img
+                src={game.thumbnail}
+                alt={game.title}
+                style={styles.thumbnail}
+              />
+              <div
+                style={{ ...styles.cardIconBadge, background: game.gradient }}
+              >
+                {game.icon}
+              </div>
+            </div>
+
+            <div style={styles.cardContent}>
+              <div style={styles.cardHeaderRow}>
+                <h3 style={styles.gameTitle}>{game.title}</h3>
+                <span style={styles.freeBadge}>FREE</span>
+              </div>
+
+              <button
+                style={{ ...styles.playNowBtn, background: game.gradient }}
+              >
+                Play Now <Play size={16} fill="white" />
+              </button>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+// ---------- Styles ----------
+const styles = {
+  appContainer: {
+    minHeight: "100vh",
+    backgroundColor: "#000",
+    backgroundImage: "url('bgArt.png')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    color: "white",
+    overflowX: "hidden",
+  },
+
+  /* GAME OVERLAY */
+  gameOverlay: {
+    position: "fixed",
+    inset: 0,
+    background: "black",
+    zIndex: 9999,
+  },
+  gameIframe: {
+    width: "100%",
+    height: "100%",
+    border: "none",
+  },
+  closeGameBtn: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    zIndex: 10000,
+    background: "rgba(0,0,0,0.7)",
+    color: "white",
+    border: "none",
+    padding: "0.75rem 1rem",
+    borderRadius: "9999px",
+    display: "flex",
+    alignItems: "center",
+    gap: "0.5rem",
+    cursor: "pointer",
+  },
+
+  /* LANDING */
+  landingWrapper: {
+    height: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    padding: "2rem",
+  },
+  heroSection: {
+    flex: 1,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  characterContainer: {
+    width: "100%",
+    height: "100%",
+    maxWidth: 400,
+  },
+  startBtn: {
+    backgroundColor: "white",
+    color: "#1f2937",
+    display: "flex",
+    alignItems: "center",
+    width: "100%",
+    maxWidth: 400,
+    padding: "0.5rem",
+    borderRadius: "9999px",
+    border: "none",
+    cursor: "pointer",
+    marginBottom: "2rem",
+  },
+  playIconCircle: {
+    backgroundColor: "#f97316",
+    padding: "1rem",
+    borderRadius: "50%",
+  },
+  startBtnText: {
+    flex: 1,
+    fontSize: "1.5rem",
+    fontWeight: "bold",
+    textAlign: "center",
+    paddingRight: 40,
+  },
+
+  /* BROWSER */
+  browserContainer: {
+    maxWidth: 1200,
+    margin: "0 auto",
+    padding: "2rem 1.5rem",
+  },
+  header: {
+    display: "flex",
+    justifyContent: "space-between",
+    marginBottom: "3rem",
+  },
+  backBtn: {
+    background: "none",
+    border: "none",
+    color: "rgba(255,255,255,0.8)",
+    cursor: "pointer",
+    display: "flex",
+    gap: "0.5rem",
+  },
+  browserTitle: {
+    fontSize: "2.5rem",
+    fontWeight: 900,
+    fontStyle: "italic",
+  },
+  pointsBadge: {
+    backgroundColor: "rgba(255,255,255,0.2)",
+    padding: "0.75rem 1.25rem",
+    borderRadius: "1rem",
+    display: "flex",
+    gap: "0.5rem",
+  },
+  gameGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+    gap: "2rem",
+  },
+  gameCard: {
+    background: "white",
+    borderRadius: "2rem",
+    overflow: "hidden",
+    cursor: "pointer",
+  },
+  thumbnailWrapper: {
+    height: 180,
+    position: "relative",
+  },
+  thumbnail: {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+  },
+  cardIconBadge: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    padding: 12,
+    borderRadius: 16,
+    color: "white",
+  },
+  cardContent: {
+    padding: "1.5rem",
+  },
+  cardHeaderRow: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  gameTitle: {
+    color: "#1f2937",
+    fontSize: "1.5rem",
+    fontWeight: "bold",
+  },
+  freeBadge: {
+    backgroundColor: "#f3f4f6",
+    color: "#6b7280",
+    fontSize: "0.75rem",
+    padding: "0.25rem 0.75rem",
+    borderRadius: "9999px",
+  },
+  playNowBtn: {
+    width: "100%",
+    marginTop: "1rem",
+    padding: "1rem",
+    borderRadius: "1rem",
+    border: "none",
+    color: "white",
+    fontWeight: "bold",
+    cursor: "pointer",
+  },
+};
