@@ -12,6 +12,7 @@ import {
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Environment } from "@react-three/drei";
 import VoodooModel from "./components/VoodooModel";
+import "./index.css";
 
 // --- Game Data Configuration ---
 const GAMES = [
@@ -115,7 +116,10 @@ function LandingScreen({ onStart }) {
     >
       <div style={styles.heroSection}>
         <div style={styles.characterContainer}>
-          <Canvas camera={{ position: [4, 1.8, 4.5], fov: 40 }}>
+          <Canvas
+            style={{ height: "420px", width: "100%" }}
+            camera={{ position: [4, 1.8, 4.5], fov: 40 }}
+          >
             <ambientLight intensity={1.2} />
             <directionalLight position={[5, 5, 5]} />
             <Environment preset="city" />
@@ -134,7 +138,7 @@ function LandingScreen({ onStart }) {
         <div style={styles.playIconCircle}>
           <Play fill="white" size={24} />
         </div>
-        <span style={styles.startBtnText}>START PLAYING</span>
+        <span style={styles.startBtnText}>START</span>
       </motion.button>
     </motion.div>
   );
@@ -208,7 +212,7 @@ function GameBrowser({ onBack, onPlay }) {
 // ---------- Styles ----------
 const styles = {
   appContainer: {
-    minHeight: "100vh",
+    minHeight: "100%",
     backgroundColor: "#000",
     backgroundImage: "url('bgArt.png')",
     backgroundSize: "cover",
@@ -247,11 +251,10 @@ const styles = {
 
   /* LANDING */
   landingWrapper: {
-    height: "100vh",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    padding: "2rem",
+    minHeight: "100vh",
   },
   heroSection: {
     flex: 1,
@@ -261,7 +264,7 @@ const styles = {
   },
   characterContainer: {
     width: "100%",
-    height: "100%",
+    minHeight: "420px",
     maxWidth: 400,
   },
   startBtn: {
@@ -269,17 +272,17 @@ const styles = {
     color: "#1f2937",
     display: "flex",
     alignItems: "center",
-    width: "100%",
+    width: "80%",
     maxWidth: 400,
     padding: "0.5rem",
     borderRadius: "9999px",
     border: "none",
     cursor: "pointer",
-    marginBottom: "2rem",
+    margin: "0 auto 2rem auto",
   },
   playIconCircle: {
     backgroundColor: "#f97316",
-    padding: "1rem",
+    padding: "0.8rem",
     borderRadius: "50%",
   },
   startBtnText: {
