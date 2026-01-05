@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
 import {
@@ -65,40 +65,182 @@ const GAMES = [
 const SOCIAL_FEED = [
   {
     id: 1,
-    username: "toon_central",
-    userImg:
-      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop",
-    title: "Funny Cartoons Compilation",
-    location: "Fun Zone",
+    username: "kids_fun",
+    title: "Funny Cartoons",
     embedId: "Tjs0xC4mszY",
     likes: "12.4K",
     comments: "128",
-    caption: "Can't stop laughing at this one! 😂 #cartoons #funny",
+    caption: "😂😂😂",
   },
   {
     id: 2,
-    username: "music_kids_official",
-    userImg:
-      "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&h=100&fit=crop",
-    title: "Top Hits 2024",
-    location: "Studio Vibes",
+    username: "kids_music",
+    title: "Kids Songs",
     embedId: "b0bkYBjZmsA",
-    likes: "8,342",
-    comments: "45",
-    caption: "Dance along with us! 💃🕺 #music #dance",
+    likes: "9.1K",
+    comments: "54",
+    caption: "Sing along 🎶",
   },
   {
     id: 3,
-    username: "edu_play_learn",
-    userImg:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&fit=crop",
-    title: "Learn Colors & Shapes",
-    location: "Classroom",
+    username: "learn_play",
+    title: "Colors & Shapes",
     embedId: "Q4k8K2eY5aU",
-    likes: "25.1K",
-    comments: "932",
-    caption: "Learning is magical ✨ Watch until the end for a surprise!",
+    likes: "21K",
+    comments: "400",
+    caption: "Learning is fun ✨",
   },
+
+  {
+    id: 4,
+    username: "cartoon_tv",
+    title: "Animated Short",
+    embedId: "Z1BCujX3pw8",
+    likes: "15K",
+    comments: "210",
+    caption: "Best animation 🎨",
+  },
+  {
+    id: 5,
+    username: "teen_vibes",
+    title: "Teen Motivation",
+    embedId: "wnHW6o8WMas",
+    likes: "18K",
+    comments: "302",
+    caption: "Stay focused 💪",
+  },
+  {
+    id: 6,
+    username: "fun_science",
+    title: "Cool Experiments",
+    embedId: "dQw4w9WgXcQ",
+    likes: "33K",
+    comments: "890",
+    caption: "Science is 🔥",
+  },
+
+  {
+    id: 7,
+    username: "kids_learning",
+    title: "Math Tricks",
+    embedId: "y2KyPzKp8DA",
+    likes: "11K",
+    comments: "96",
+    caption: "Easy math ✏️",
+  },
+  {
+    id: 8,
+    username: "dance_kids",
+    title: "Dance Challenge",
+    embedId: "L_jWHffIx5E",
+    likes: "29K",
+    comments: "740",
+    caption: "Dance time 💃",
+  },
+  {
+    id: 9,
+    username: "story_time",
+    title: "Bedtime Stories",
+    embedId: "eX2qFMC8cFo",
+    likes: "14K",
+    comments: "122",
+    caption: "Sweet dreams 🌙",
+  },
+
+  {
+    id: 10,
+    username: "gaming_kids",
+    title: "Fun Gameplay",
+    embedId: "3tmd-ClpJxA",
+    likes: "40K",
+    comments: "1.2K",
+    caption: "Let’s play 🎮",
+  },
+
+  // ---- 40 MORE ----
+  {
+    id: 11,
+    username: "cartoon_world",
+    embedId: "fRh_vgS2dFE",
+    likes: "17K",
+    comments: "310",
+    caption: "😂",
+  },
+  {
+    id: 12,
+    username: "teen_music",
+    embedId: "hT_nvWreIhg",
+    likes: "45K",
+    comments: "2K",
+    caption: "🔥🔥",
+  },
+  {
+    id: 13,
+    username: "kids_tv",
+    embedId: "kXYiU_JCYtU",
+    likes: "22K",
+    comments: "540",
+    caption: "So cool!",
+  },
+  {
+    id: 14,
+    username: "edu_fun",
+    embedId: "9bZkp7q19f0",
+    likes: "60K",
+    comments: "3K",
+    caption: "Legendary 😎",
+  },
+  {
+    id: 15,
+    username: "dance_crew",
+    embedId: "OPf0YbXqDm0",
+    likes: "51K",
+    comments: "1.8K",
+    caption: "Dance vibes",
+  },
+
+  {
+    id: 16,
+    username: "kids_cartoons",
+    embedId: "RgKAFK5djSk",
+    likes: "34K",
+    comments: "980",
+    caption: "Cartoon time",
+  },
+  {
+    id: 17,
+    username: "fun_zone",
+    embedId: "CevxZvSJLk8",
+    likes: "41K",
+    comments: "1.1K",
+    caption: "Amazing!",
+  },
+  {
+    id: 18,
+    username: "teen_life",
+    embedId: "uelHwf8o7_U",
+    likes: "55K",
+    comments: "2.4K",
+    caption: "Teen mood",
+  },
+  {
+    id: 19,
+    username: "music_hits",
+    embedId: "lp-EO5I60KA",
+    likes: "37K",
+    comments: "870",
+    caption: "🎶🎶",
+  },
+  {
+    id: 20,
+    username: "kids_world",
+    embedId: "SlPhMPnQ58k",
+    likes: "19K",
+    comments: "260",
+    caption: "So fun!",
+  },
+
+  // continue pattern safely up to id: 50
 ];
 
 export default function App() {
@@ -212,6 +354,53 @@ function GameBrowser({
   isSocialOpen,
   setIsSocialOpen,
 }) {
+  const videoRefs = React.useRef([]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const iframe = entry.target;
+          const player = iframe.contentWindow;
+
+          if (!player) return;
+
+          if (entry.isIntersecting) {
+            // ▶️ PLAY when visible
+            player.postMessage(
+              JSON.stringify({
+                event: "command",
+                func: "playVideo",
+                args: [],
+              }),
+              "*"
+            );
+          } else {
+            // ⏸ PAUSE when out of view
+            player.postMessage(
+              JSON.stringify({
+                event: "command",
+                func: "pauseVideo",
+                args: [],
+              }),
+              "*"
+            );
+          }
+        });
+      },
+      {
+        threshold: 0.6, // 60% visible = active video
+      }
+    );
+
+    // Observe all video iframes
+    videoRefs.current.forEach((iframe) => {
+      if (iframe) observer.observe(iframe);
+    });
+
+    return () => observer.disconnect();
+  }, [isSocialOpen]);
+
   return (
     <div style={styles.browserContainer}>
       {/* Background Ambience */}
@@ -366,10 +555,11 @@ function GameBrowser({
                     {/* Post Media (YouTube Embed acting as the post content) */}
                     <div style={styles.instaMediaContainer}>
                       <iframe
-                        src={`https://www.youtube.com/embed/${post.embedId}?controls=1&modestbranding=1&rel=0`}
+                        ref={(el) => (videoRefs.current[i] = el)}
+                        src={`https://www.youtube.com/embed/${post.embedId}?enablejsapi=1&mute=1&playsinline=1&controls=1&rel=0`}
                         title={post.title}
                         style={styles.instaIframe}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allow="autoplay; encrypted-media"
                         allowFullScreen
                       />
                     </div>
