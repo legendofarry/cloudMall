@@ -70,7 +70,7 @@ const SOCIAL_FEED = [
       "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop",
     title: "Funny Cartoons Compilation",
     location: "Fun Zone",
-    embedId: "j6dcnl65814",
+    embedId: "Tjs0xC4mszY",
     likes: "12.4K",
     comments: "128",
     caption: "Can't stop laughing at this one! 😂 #cartoons #funny",
@@ -82,7 +82,7 @@ const SOCIAL_FEED = [
       "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&h=100&fit=crop",
     title: "Top Hits 2024",
     location: "Studio Vibes",
-    embedId: "Mh85R-S-il8",
+    embedId: "b0bkYBjZmsA",
     likes: "8,342",
     comments: "45",
     caption: "Dance along with us! 💃🕺 #music #dance",
@@ -363,28 +363,6 @@ function GameBrowser({
                     transition={{ delay: i * 0.1 }}
                     style={styles.instaPost}
                   >
-                    {/* Post Header */}
-                    <div style={styles.instaPostHeader}>
-                      <div style={styles.instaUserGroup}>
-                        <div style={styles.instaAvatarRing}>
-                          <img
-                            src={post.userImg}
-                            alt="user"
-                            style={styles.instaAvatar}
-                          />
-                        </div>
-                        <div style={styles.instaUserInfo}>
-                          <span style={styles.instaUsername}>
-                            {post.username}
-                          </span>
-                          <span style={styles.instaLocation}>
-                            {post.location}
-                          </span>
-                        </div>
-                      </div>
-                      <MoreHorizontal size={20} color="#fff" />
-                    </div>
-
                     {/* Post Media (YouTube Embed acting as the post content) */}
                     <div style={styles.instaMediaContainer}>
                       <iframe
@@ -409,13 +387,7 @@ function GameBrowser({
                           color="#fff"
                           style={styles.actionIcon}
                         />
-                        <Send
-                          size={26}
-                          color="#fff"
-                          style={styles.actionIcon}
-                        />
                       </div>
-                      <Bookmark size={26} color="#fff" />
                     </div>
 
                     {/* Likes & Caption */}
@@ -587,8 +559,8 @@ const styles = {
     backdropFilter: "blur(10px)",
     display: "flex",
     justifyContent: "center",
-    alignItems: "center",
-    padding: "2rem",
+    alignItems: "flex-start",
+    padding: "0 0 2rem 0",
   },
   modalContent: {
     width: "100%",
@@ -686,11 +658,11 @@ const styles = {
   },
   instaStickyHeader: {
     height: "60px",
+    paddingLeft: "1rem",
     borderBottom: "1px solid #262626",
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: "0 1rem",
     backgroundColor: "#000",
     zIndex: 10,
     flexShrink: 0,
