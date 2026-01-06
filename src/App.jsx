@@ -18,13 +18,14 @@ import loadingAnimation from "./loading.json";
 const GlobalStyles = () => (
   <style>
     {`
-      @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700,800,900');
+      @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
       body { 
-        font-family: 'Poppins', sans-serif;
+        font-family: "Montserrat", sans-serif;
         margin: 0;
         overflow: hidden; /* Prevent scrolling on the main page */
         background-color: #000;
       }
+      a,p,span,button,h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif;}
       .hover-target { cursor: pointer; }
     `}
   </style>
