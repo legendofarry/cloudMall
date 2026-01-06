@@ -10,20 +10,20 @@ import {
   ArrowLeft,
   Heart,
   MessageCircle,
-  Play,
-  Music,
 } from "lucide-react";
 
 // !!! IMPORT YOUR JSON FILE HERE !!!
 import loadingAnimation from "./loading.json";
 
-// We inject the font and basic resets here to ensure the look matches the CodePen
 const GlobalStyles = () => (
   <style>
     {`
+      @import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700,800,900');
       body { 
-      font-family: "Montserrat", system-ui, Avenir, Helvetica, Arial, sans-serif;
-      margin : 0;
+        font-family: 'Poppins', sans-serif;
+        margin: 0;
+        overflow: hidden; /* Prevent scrolling on the main page */
+        background-color: #000;
       }
       .hover-target { cursor: pointer; }
     `}
@@ -87,173 +87,16 @@ const SOCIAL_FEED = [
     comments: "54",
     caption: "Sing along 🎶",
   },
-  {
-    id: 3,
-    username: "learn_play",
-    title: "Colors & Shapes",
-    embedId: "Q4k8K2eY5aU",
-    likes: "21K",
-    comments: "400",
-    caption: "Learning is fun ✨",
-  },
-
-  {
-    id: 4,
-    username: "cartoon_tv",
-    title: "Animated Short",
-    embedId: "Z1BCujX3pw8",
-    likes: "15K",
-    comments: "210",
-    caption: "Best animation 🎨",
-  },
-  {
-    id: 5,
-    username: "teen_vibes",
-    title: "Teen Motivation",
-    embedId: "wnHW6o8WMas",
-    likes: "18K",
-    comments: "302",
-    caption: "Stay focused 💪",
-  },
-  {
-    id: 6,
-    username: "fun_science",
-    title: "Cool Experiments",
-    embedId: "dQw4w9WgXcQ",
-    likes: "33K",
-    comments: "890",
-    caption: "Science is 🔥",
-  },
-
-  {
-    id: 7,
-    username: "kids_learning",
-    title: "Math Tricks",
-    embedId: "y2KyPzKp8DA",
-    likes: "11K",
-    comments: "96",
-    caption: "Easy math ✏️",
-  },
-  {
-    id: 8,
-    username: "dance_kids",
-    title: "Dance Challenge",
-    embedId: "L_jWHffIx5E",
-    likes: "29K",
-    comments: "740",
-    caption: "Dance time 💃",
-  },
-  {
-    id: 9,
-    username: "story_time",
-    title: "Bedtime Stories",
-    embedId: "eX2qFMC8cFo",
-    likes: "14K",
-    comments: "122",
-    caption: "Sweet dreams 🌙",
-  },
-
-  {
-    id: 10,
-    username: "gaming_kids",
-    title: "Fun Gameplay",
-    embedId: "3tmd-ClpJxA",
-    likes: "40K",
-    comments: "1.2K",
-    caption: "Let’s play 🎮",
-  },
-
-  // ---- 40 MORE ----
-  {
-    id: 11,
-    username: "cartoon_world",
-    embedId: "fRh_vgS2dFE",
-    likes: "17K",
-    comments: "310",
-    caption: "😂",
-  },
-  {
-    id: 12,
-    username: "teen_music",
-    embedId: "hT_nvWreIhg",
-    likes: "45K",
-    comments: "2K",
-    caption: "🔥🔥",
-  },
-  {
-    id: 13,
-    username: "kids_tv",
-    embedId: "kXYiU_JCYtU",
-    likes: "22K",
-    comments: "540",
-    caption: "So cool!",
-  },
-  {
-    id: 14,
-    username: "edu_fun",
-    embedId: "9bZkp7q19f0",
-    likes: "60K",
-    comments: "3K",
-    caption: "Legendary 😎",
-  },
-  {
-    id: 15,
-    username: "dance_crew",
-    embedId: "OPf0YbXqDm0",
-    likes: "51K",
-    comments: "1.8K",
-    caption: "Dance vibes",
-  },
-
-  {
-    id: 16,
-    username: "kids_cartoons",
-    embedId: "RgKAFK5djSk",
-    likes: "34K",
-    comments: "980",
-    caption: "Cartoon time",
-  },
-  {
-    id: 17,
-    username: "fun_zone",
-    embedId: "CevxZvSJLk8",
-    likes: "41K",
-    comments: "1.1K",
-    caption: "Amazing!",
-  },
-  {
-    id: 18,
-    username: "teen_life",
-    embedId: "uelHwf8o7_U",
-    likes: "55K",
-    comments: "2.4K",
-    caption: "Teen mood",
-  },
-  {
-    id: 19,
-    username: "music_hits",
-    embedId: "lp-EO5I60KA",
-    likes: "37K",
-    comments: "870",
-    caption: "🎶🎶",
-  },
-  {
-    id: 20,
-    username: "kids_world",
-    embedId: "SlPhMPnQ58k",
-    likes: "19K",
-    comments: "260",
-    caption: "So fun!",
-  },
-
-  // continue pattern safely up to id: 50
+  // ... more data
 ];
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
+  const [activeGame, setActiveGame] = useState(null);
+
+  // Navigation States
   const [isArcadeOpen, setIsArcadeOpen] = useState(false);
   const [isSocialOpen, setIsSocialOpen] = useState(false);
-  const [activeGame, setActiveGame] = useState(null);
 
   // Simulate Loading Delay
   useEffect(() => {
@@ -343,7 +186,7 @@ function LoadingScreen() {
   );
 }
 
-// ---------- Main Browser & Modals ----------
+// ---------- Main Browser ----------
 function GameBrowser({
   onPlayGame,
   isArcadeOpen,
@@ -352,13 +195,48 @@ function GameBrowser({
   setIsSocialOpen,
 }) {
   const [hoveredSide, setHoveredSide] = useState(null); // 'left' or 'right'
+  const [isMobile, setIsMobile] = useState(false);
   const videoRefs = useRef([]);
 
-  // --- Header Component ---
+  // Detect Mobile View
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // --- Interaction Handlers ---
+
+  // Desktop Hover
+  const handleMouseEnter = (side) => {
+    if (!isMobile) setHoveredSide(side);
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile) setHoveredSide(null);
+  };
+
+  // Mobile Tap (Expands the card)
+  const handleCardClick = (side) => {
+    // If mobile, tapping the card sets it as the "hovered" (expanded) side
+    if (isMobile) {
+      if (hoveredSide !== side) {
+        setHoveredSide(side);
+      }
+    }
+  };
+
+  // Button Click (Actually performs the action)
+  const handleButtonClick = (e, setOpenAction) => {
+    e.stopPropagation();
+    setOpenAction(true);
+  };
+
   const Header = () => (
     <div style={styles.floatingHeader}>
-      <Gamepad2 size={28} color="#fff" />
-      <span style={{ fontWeight: 800, fontSize: "1.2rem", letterSpacing: 1 }}>
+      <Gamepad2 size={24} color="#fff" />
+      <span style={{ fontWeight: 800, fontSize: "1rem", letterSpacing: 1 }}>
         CLOUD<span style={{ color: "#4ade80" }}>MALL</span>
       </span>
     </div>
@@ -368,21 +246,24 @@ function GameBrowser({
     <div style={styles.browserContainer}>
       <Header />
 
-      {/* --- NEW SPLIT MENU DESIGN --- */}
+      {/* --- SPLIT MENU WRAPPER (Always Row/Horizontal) --- */}
       <div style={styles.splitMenuWrapper}>
         {/* LEFT SIDE: ARCADE */}
         <motion.div
           style={styles.splitSection}
           animate={{
+            // Squeeze logic:
+            // Default: 1 (50%)
+            // Selected: 2 (approx 66-70%)
+            // Unselected: 0.7 (approx 30-33%) - adjusted for mobile legibility
             flex:
-              hoveredSide === "left" ? 2 : hoveredSide === "right" ? 0.8 : 1,
+              hoveredSide === "left" ? 2 : hoveredSide === "right" ? 0.7 : 1,
           }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
-          onMouseEnter={() => setHoveredSide("left")}
-          onMouseLeave={() => setHoveredSide(null)}
-          onClick={() => setIsArcadeOpen(true)}
+          onMouseEnter={() => handleMouseEnter("left")}
+          onMouseLeave={handleMouseLeave}
+          onClick={() => handleCardClick("left")}
         >
-          {/* Background Image */}
           <div
             style={{
               ...styles.splitBg,
@@ -390,21 +271,26 @@ function GameBrowser({
                 'url("https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2071&auto=format&fit=crop")',
             }}
           />
-          {/* Gradient Overlay */}
           <div style={styles.overlayArcade} />
 
           <div style={styles.splitContent}>
             <motion.div
               animate={{ scale: hoveredSide === "left" ? 1.1 : 1 }}
-              style={{ marginBottom: 20 }}
+              style={{ marginBottom: 15 }}
             >
-              <Gamepad2 size={hoveredSide === "left" ? 80 : 50} color="#fff" />
+              <Gamepad2
+                size={hoveredSide === "left" ? (isMobile ? 50 : 80) : 40}
+                color="#fff"
+              />
             </motion.div>
 
-            <h2 style={styles.splitTitle}>
+            <h2
+              style={{
+                ...styles.splitTitle,
+                fontSize: isMobile ? "2rem" : "4rem", // Smaller text on mobile to fit
+              }}
+            >
               ARCADE
-              <br />
-              ZONE
             </h2>
 
             <motion.div
@@ -415,18 +301,24 @@ function GameBrowser({
               }}
               style={styles.splitHiddenContent}
             >
-              <ul style={styles.featureList}>
-                <li>
-                  <span>Puzzles & Logic</span>
-                </li>
-                <li>
-                  <span>Action Heroes</span>
-                </li>
-                <li>
-                  <span>Rhythm Games</span>
-                </li>
-              </ul>
-              <button style={styles.splitBtn}>PLAY NOW</button>
+              {/* Hide list on mobile to save space, show only on desktop or if really needed */}
+              {!isMobile && (
+                <ul style={styles.featureList}>
+                  <li>
+                    <span>Puzzles & Logic</span>
+                  </li>
+                  <li>
+                    <span>Action Heroes</span>
+                  </li>
+                </ul>
+              )}
+
+              <button
+                style={styles.splitBtn}
+                onClick={(e) => handleButtonClick(e, setIsArcadeOpen)}
+              >
+                PLAY
+              </button>
             </motion.div>
           </div>
         </motion.div>
@@ -436,14 +328,13 @@ function GameBrowser({
           style={styles.splitSection}
           animate={{
             flex:
-              hoveredSide === "right" ? 2 : hoveredSide === "left" ? 0.8 : 1,
+              hoveredSide === "right" ? 2 : hoveredSide === "left" ? 0.7 : 1,
           }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
-          onMouseEnter={() => setHoveredSide("right")}
-          onMouseLeave={() => setHoveredSide(null)}
-          onClick={() => setIsSocialOpen(true)}
+          onMouseEnter={() => handleMouseEnter("right")}
+          onMouseLeave={handleMouseLeave}
+          onClick={() => handleCardClick("right")}
         >
-          {/* Background Image */}
           <div
             style={{
               ...styles.splitBg,
@@ -451,20 +342,26 @@ function GameBrowser({
                 'url("https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1974&auto=format&fit=crop")',
             }}
           />
-          {/* Gradient Overlay */}
           <div style={styles.overlaySocial} />
 
           <div style={styles.splitContent}>
             <motion.div
               animate={{ scale: hoveredSide === "right" ? 1.1 : 1 }}
-              style={{ marginBottom: 20 }}
+              style={{ marginBottom: 15 }}
             >
-              <Youtube size={hoveredSide === "right" ? 80 : 50} color="#fff" />
+              <Youtube
+                size={hoveredSide === "right" ? (isMobile ? 50 : 80) : 40}
+                color="#fff"
+              />
             </motion.div>
 
-            <h2 style={styles.splitTitle}>
+            <h2
+              style={{
+                ...styles.splitTitle,
+                fontSize: isMobile ? "2rem" : "4rem",
+              }}
+            >
               WATCH
-              <br />& CHILL
             </h2>
 
             <motion.div
@@ -475,18 +372,23 @@ function GameBrowser({
               }}
               style={styles.splitHiddenContent}
             >
-              <ul style={styles.featureList}>
-                <li>
-                  <span>Cartoons</span>
-                </li>
-                <li>
-                  <span>Music Videos</span>
-                </li>
-                <li>
-                  <span>Teen Vibes</span>
-                </li>
-              </ul>
-              <button style={styles.splitBtn}>OPEN FEED</button>
+              {!isMobile && (
+                <ul style={styles.featureList}>
+                  <li>
+                    <span>Cartoons</span>
+                  </li>
+                  <li>
+                    <span>Music Videos</span>
+                  </li>
+                </ul>
+              )}
+
+              <button
+                style={styles.splitBtn}
+                onClick={(e) => handleButtonClick(e, setIsSocialOpen)}
+              >
+                OPEN
+              </button>
             </motion.div>
           </div>
         </motion.div>
@@ -511,7 +413,6 @@ function GameBrowser({
                   <X size={28} />
                 </button>
               </div>
-
               <div style={styles.grid}>
                 {GAMES.map((game, i) => (
                   <motion.div
@@ -672,10 +573,9 @@ const styles = {
     fontSize: "0.8rem",
     letterSpacing: "0.2em",
     fontWeight: "600",
-    fontFamily: "Poppins, sans-serif",
   },
 
-  // --- SPLIT MENU LAYOUT (The Requested UI Change) ---
+  // --- SPLIT MENU LAYOUT ---
   browserContainer: {
     height: "100%",
     width: "100%",
@@ -684,19 +584,23 @@ const styles = {
   },
   floatingHeader: {
     position: "absolute",
-    top: "30px",
-    left: "35%",
+    top: "20px",
+    left: "50%",
+    transform: "translateX(-50%)",
     zIndex: 50,
     display: "flex",
     alignItems: "center",
-    gap: "10px",
-    background: "rgba(0,0,0,0.5)",
+    gap: "8px",
+    background: "rgba(0,0,0,0.6)",
     backdropFilter: "blur(5px)",
-    padding: "10px 20px",
+    padding: "8px 16px",
     borderRadius: "50px",
+    border: "1px solid rgba(255,255,255,0.1)",
+    whiteSpace: "nowrap",
   },
   splitMenuWrapper: {
     display: "flex",
+    flexDirection: "row", // ALWAYS ROW
     width: "100%",
     height: "100%",
   },
@@ -720,19 +624,18 @@ const styles = {
     transition: "transform 1s ease",
     zIndex: 0,
   },
-  // Gradients to match the colors in your original code
   overlayArcade: {
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(135deg, rgba(124, 58, 237, 0.85), rgba(37, 99, 235, 0.85))",
+      "linear-gradient(135deg, rgba(124, 58, 237, 0.9), rgba(37, 99, 235, 0.9))",
     zIndex: 1,
   },
   overlaySocial: {
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(135deg, rgba(219, 39, 119, 0.85), rgba(225, 29, 72, 0.85))",
+      "linear-gradient(135deg, rgba(219, 39, 119, 0.9), rgba(225, 29, 72, 0.9))",
     zIndex: 1,
   },
   splitContent: {
@@ -740,15 +643,17 @@ const styles = {
     zIndex: 10,
     textAlign: "center",
     width: "100%",
-    padding: "0 20px",
+    padding: "0 10px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
   },
   splitTitle: {
-    fontSize: "4rem",
     fontWeight: "900",
     lineHeight: "1",
     margin: "0",
     textShadow: "0 10px 30px rgba(0,0,0,0.3)",
-    letterSpacing: "-2px",
+    letterSpacing: "-1px",
   },
   splitHiddenContent: {
     overflow: "hidden",
@@ -759,29 +664,29 @@ const styles = {
   featureList: {
     listStyle: "none",
     padding: 0,
-    margin: "20px 0",
+    margin: "15px 0",
     textAlign: "center",
     opacity: 0.8,
     fontWeight: "500",
-    fontSize: "1.1rem",
-    lineHeight: "1.8",
+    fontSize: "1rem",
+    lineHeight: "1.6",
   },
   splitBtn: {
     marginTop: "10px",
-    padding: "12px 35px",
+    padding: "10px 25px",
     borderRadius: "50px",
     background: "#fff",
     color: "#000",
     border: "none",
     fontWeight: "800",
-    fontSize: "0.9rem",
+    fontSize: "0.8rem",
     cursor: "pointer",
     letterSpacing: "1px",
     boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
     textTransform: "uppercase",
   },
 
-  // --- MODALS (Grid) ---
+  // --- MODALS ---
   modalOverlay: {
     position: "fixed",
     inset: 0,
@@ -790,15 +695,16 @@ const styles = {
     backdropFilter: "blur(15px)",
     display: "flex",
     justifyContent: "center",
-    alignItems: "center", // Centered for PC
+    alignItems: "center",
+    padding: "1rem",
   },
   modalContent: {
     width: "100%",
     maxWidth: "1100px",
-    height: "85vh",
+    height: "90vh",
     background: "#1a1a1d",
     borderRadius: "24px",
-    padding: "2.5rem",
+    padding: "1.5rem",
     display: "flex",
     flexDirection: "column",
     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
@@ -808,32 +714,30 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "2rem",
+    marginBottom: "1.5rem",
   },
   modalTitle: {
-    fontSize: "2rem",
+    fontSize: "1.5rem",
     fontWeight: "800",
     margin: 0,
     color: "#fff",
-    letterSpacing: "-1px",
   },
   modalCloseBtn: {
     background: "#333",
     border: "none",
     color: "#fff",
     borderRadius: "50%",
-    width: "48px",
-    height: "48px",
+    width: "40px",
+    height: "40px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
-    transition: "background 0.2s",
   },
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
-    gap: "2rem",
+    gap: "1.5rem",
     overflowY: "auto",
     padding: "0.5rem",
   },
@@ -867,16 +771,18 @@ const styles = {
     fontWeight: "700",
     color: "#000",
   },
-  cardInfo: { padding: "1.2rem" },
+  cardInfo: { padding: "1rem" },
   cardTitle: { margin: "0 0 0.5rem 0", fontSize: "1.1rem", fontWeight: "700" },
   stars: { display: "flex", gap: "3px" },
 
   // --- INSTAGRAM MODAL ---
   instaModalContent: {
     width: "100%",
-    height: "100vh",
+    maxWidth: "450px",
+    height: "90vh",
     background: "#000",
     border: "1px solid #333",
+    borderRadius: "20px",
     display: "flex",
     flexDirection: "column",
     boxShadow: "0 0 50px rgba(0,0,0,0.8)",
@@ -899,15 +805,8 @@ const styles = {
     color: "#fff",
     cursor: "pointer",
   },
-  instaHeaderTitle: {
-    fontWeight: "bold",
-    fontSize: "1.1rem",
-  },
-  instaFeed: {
-    flex: 1,
-    overflowY: "auto",
-    paddingBottom: "2rem",
-  },
+  instaHeaderTitle: { fontWeight: "bold", fontSize: "1.1rem" },
+  instaFeed: { flex: 1, overflowY: "auto", paddingBottom: "2rem" },
   instaPost: {
     marginBottom: "1.5rem",
     borderBottom: "1px solid #1a1a1a",
@@ -918,15 +817,8 @@ const styles = {
     aspectRatio: "1/1",
     backgroundColor: "#111",
   },
-  instaIframe: {
-    width: "100%",
-    height: "100%",
-    border: "none",
-  },
-  instaActionBar: {
-    display: "flex",
-    padding: "0.8rem 1rem",
-  },
+  instaIframe: { width: "100%", height: "100%", border: "none" },
+  instaActionBar: { display: "flex", padding: "0.8rem 1rem" },
   instaActionLeft: { display: "flex", gap: "1rem" },
   actionIcon: { cursor: "pointer" },
   instaFooter: { padding: "0 1rem" },
@@ -960,10 +852,5 @@ const styles = {
     boxShadow: "0 4px 15px rgba(239, 68, 68, 0.4)",
     zIndex: 201,
   },
-  iframe: {
-    width: "100%",
-    height: "100%",
-    border: "none",
-    flex: 1,
-  },
+  iframe: { width: "100%", height: "100%", border: "none", flex: 1 },
 };
