@@ -232,7 +232,7 @@ function GameBrowser({
     autoTimerRef.current = setTimeout(() => {
       setHoveredSide(sides[autoIndex]);
       setAutoIndex((prev) => (prev + 1) % sides.length);
-    }, 1500); // 👈 time each card stays expanded
+    }, 100); // 👈 time each card stays expanded
 
     return () => clearTimeout(autoTimerRef.current);
   }, [autoIndex, hoveredSide, isMobile]);
@@ -243,7 +243,7 @@ function GameBrowser({
 
     const resetTimer = setTimeout(() => {
       setHoveredSide(null);
-    }, 1000); // 👈 how long before shrinking back
+    }, 2500); // 👈 how long before shrinking back
 
     return () => clearTimeout(resetTimer);
   }, [hoveredSide]);
