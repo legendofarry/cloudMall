@@ -1,3 +1,4 @@
+// src\App.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
@@ -209,6 +210,10 @@ function GameBrowser({
   const [isMobile, setIsMobile] = useState(false);
   const videoRefs = useRef([]);
 
+  const sides = ["arcade", "watch", "profile"];
+  const [autoIndex, setAutoIndex] = useState(0);
+  const autoTimerRef = useRef(null);
+
   // Detect Mobile View
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -216,6 +221,32 @@ function GameBrowser({
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
+
+  // Auto Flex Animation
+  useEffect(() => {
+    if (isMobile) return; // optional: disable auto on mobile if you want
+
+    // If user is interacting, pause auto animation
+    if (hoveredSide !== null) return;
+
+    autoTimerRef.current = setTimeout(() => {
+      setHoveredSide(sides[autoIndex]);
+      setAutoIndex((prev) => (prev + 1) % sides.length);
+    }, 1500); // 👈 time each card stays expanded
+
+    return () => clearTimeout(autoTimerRef.current);
+  }, [autoIndex, hoveredSide, isMobile]);
+
+  // Shrink Back
+  useEffect(() => {
+    if (hoveredSide === null) return;
+
+    const resetTimer = setTimeout(() => {
+      setHoveredSide(null);
+    }, 1000); // 👈 how long before shrinking back
+
+    return () => clearTimeout(resetTimer);
+  }, [hoveredSide]);
 
   // --- Interaction Handlers ---
 
@@ -326,7 +357,7 @@ function GameBrowser({
 
         {/* 2. WATCH */}
         <motion.div
-          style={styles.splitSection}
+          style={{ ...styles.splitSection, flex: 1.4 }}
           animate={{
             flex: hoveredSide === "watch" ? 2.5 : hoveredSide ? 0.6 : 1,
           }}
@@ -761,6 +792,9 @@ const styles = {
     alignItems: "center",
     textAlign: "center",
     borderRight: "1px solid rgba(255,255,255,0.1)",
+  },
+  middleCard: {
+    flex: 2.5,
   },
   splitBg: {
     position: "absolute",
