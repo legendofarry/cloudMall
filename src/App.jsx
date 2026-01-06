@@ -10,6 +10,10 @@ import {
   ArrowLeft,
   Heart,
   MessageCircle,
+  User, // Added User icon
+  Settings,
+  LogOut,
+  Trophy,
 } from "lucide-react";
 
 // !!! IMPORT YOUR JSON FILE HERE !!!
@@ -98,6 +102,7 @@ export default function App() {
   // Navigation States
   const [isArcadeOpen, setIsArcadeOpen] = useState(false);
   const [isSocialOpen, setIsSocialOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false); // New State
 
   // Simulate Loading Delay
   useEffect(() => {
@@ -150,6 +155,8 @@ export default function App() {
                 setIsArcadeOpen={setIsArcadeOpen}
                 isSocialOpen={isSocialOpen}
                 setIsSocialOpen={setIsSocialOpen}
+                isProfileOpen={isProfileOpen}
+                setIsProfileOpen={setIsProfileOpen}
               />
             )}
           </motion.div>
@@ -194,8 +201,11 @@ function GameBrowser({
   setIsArcadeOpen,
   isSocialOpen,
   setIsSocialOpen,
+  isProfileOpen,
+  setIsProfileOpen,
 }) {
-  const [hoveredSide, setHoveredSide] = useState(null); // 'left' or 'right'
+  // hoveredSide can be: 'arcade' | 'watch' | 'profile' | null
+  const [hoveredSide, setHoveredSide] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const videoRefs = useRef([]);
 
@@ -209,7 +219,6 @@ function GameBrowser({
 
   // --- Interaction Handlers ---
 
-  // Desktop Hover
   const handleMouseEnter = (side) => {
     if (!isMobile) setHoveredSide(side);
   };
@@ -218,9 +227,7 @@ function GameBrowser({
     if (!isMobile) setHoveredSide(null);
   };
 
-  // Mobile Tap (Expands the card)
   const handleCardClick = (side) => {
-    // If mobile, tapping the card sets it as the "hovered" (expanded) side
     if (isMobile) {
       if (hoveredSide !== side) {
         setHoveredSide(side);
@@ -228,7 +235,6 @@ function GameBrowser({
     }
   };
 
-  // Button Click (Actually performs the action)
   const handleButtonClick = (e, setOpenAction) => {
     e.stopPropagation();
     setOpenAction(true);
@@ -247,23 +253,19 @@ function GameBrowser({
     <div style={styles.browserContainer}>
       <Header />
 
-      {/* --- SPLIT MENU WRAPPER (Always Row/Horizontal) --- */}
+      {/* --- SPLIT MENU WRAPPER (Now 3 Sections) --- */}
       <div style={styles.splitMenuWrapper}>
-        {/* LEFT SIDE: ARCADE */}
+        {/* 1. ARCADE */}
         <motion.div
           style={styles.splitSection}
           animate={{
-            // Squeeze logic:
-            // Default: 1 (50%)
-            // Selected: 2 (approx 66-70%)
-            // Unselected: 0.7 (approx 30-33%) - adjusted for mobile legibility
-            flex:
-              hoveredSide === "left" ? 2 : hoveredSide === "right" ? 0.7 : 1,
+            // Logic: If this is active -> 2.5. If something else is active -> 0.6. If none -> 1.
+            flex: hoveredSide === "arcade" ? 2.5 : hoveredSide ? 0.6 : 1,
           }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
-          onMouseEnter={() => handleMouseEnter("left")}
+          onMouseEnter={() => handleMouseEnter("arcade")}
           onMouseLeave={handleMouseLeave}
-          onClick={() => handleCardClick("left")}
+          onClick={() => handleCardClick("arcade")}
         >
           <div
             style={{
@@ -276,11 +278,11 @@ function GameBrowser({
 
           <div style={styles.splitContent}>
             <motion.div
-              animate={{ scale: hoveredSide === "left" ? 1.1 : 1 }}
+              animate={{ scale: hoveredSide === "arcade" ? 1.1 : 1 }}
               style={{ marginBottom: 15 }}
             >
               <Gamepad2
-                size={hoveredSide === "left" ? (isMobile ? 50 : 80) : 40}
+                size={hoveredSide === "arcade" ? (isMobile ? 50 : 80) : 40}
                 color="#fff"
               />
             </motion.div>
@@ -288,7 +290,7 @@ function GameBrowser({
             <h2
               style={{
                 ...styles.splitTitle,
-                fontSize: isMobile ? "2rem" : "4rem", // Smaller text on mobile to fit
+                fontSize: isMobile ? "1.5rem" : "3rem", // Adjusted for 3 cards
               }}
             >
               ARCADE
@@ -297,23 +299,21 @@ function GameBrowser({
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{
-                opacity: hoveredSide === "left" ? 1 : 0,
-                height: hoveredSide === "left" ? "auto" : 0,
+                opacity: hoveredSide === "arcade" ? 1 : 0,
+                height: hoveredSide === "arcade" ? "auto" : 0,
               }}
               style={styles.splitHiddenContent}
             >
-              {/* Hide list on mobile to save space, show only on desktop or if really needed */}
               {!isMobile && (
                 <ul style={styles.featureList}>
                   <li>
-                    <span>Puzzles & Logic</span>
+                    <span>Puzzles</span>
                   </li>
                   <li>
-                    <span>Action Heroes</span>
+                    <span>Action</span>
                   </li>
                 </ul>
               )}
-
               <button
                 style={styles.splitBtn}
                 onClick={(e) => handleButtonClick(e, setIsArcadeOpen)}
@@ -324,17 +324,16 @@ function GameBrowser({
           </div>
         </motion.div>
 
-        {/* RIGHT SIDE: SOCIAL */}
+        {/* 2. WATCH */}
         <motion.div
           style={styles.splitSection}
           animate={{
-            flex:
-              hoveredSide === "right" ? 2 : hoveredSide === "left" ? 0.7 : 1,
+            flex: hoveredSide === "watch" ? 2.5 : hoveredSide ? 0.6 : 1,
           }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
-          onMouseEnter={() => handleMouseEnter("right")}
+          onMouseEnter={() => handleMouseEnter("watch")}
           onMouseLeave={handleMouseLeave}
-          onClick={() => handleCardClick("right")}
+          onClick={() => handleCardClick("watch")}
         >
           <div
             style={{
@@ -347,11 +346,11 @@ function GameBrowser({
 
           <div style={styles.splitContent}>
             <motion.div
-              animate={{ scale: hoveredSide === "right" ? 1.1 : 1 }}
+              animate={{ scale: hoveredSide === "watch" ? 1.1 : 1 }}
               style={{ marginBottom: 15 }}
             >
               <Youtube
-                size={hoveredSide === "right" ? (isMobile ? 50 : 80) : 40}
+                size={hoveredSide === "watch" ? (isMobile ? 50 : 80) : 40}
                 color="#fff"
               />
             </motion.div>
@@ -359,7 +358,7 @@ function GameBrowser({
             <h2
               style={{
                 ...styles.splitTitle,
-                fontSize: isMobile ? "2rem" : "4rem",
+                fontSize: isMobile ? "1.5rem" : "3rem",
               }}
             >
               WATCH
@@ -368,27 +367,94 @@ function GameBrowser({
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{
-                opacity: hoveredSide === "right" ? 1 : 0,
-                height: hoveredSide === "right" ? "auto" : 0,
+                opacity: hoveredSide === "watch" ? 1 : 0,
+                height: hoveredSide === "watch" ? "auto" : 0,
               }}
               style={styles.splitHiddenContent}
             >
               {!isMobile && (
                 <ul style={styles.featureList}>
                   <li>
-                    <span>Cartoons</span>
+                    <span>Videos</span>
                   </li>
                   <li>
-                    <span>Music Videos</span>
+                    <span>Music</span>
                   </li>
                 </ul>
               )}
-
               <button
                 style={styles.splitBtn}
                 onClick={(e) => handleButtonClick(e, setIsSocialOpen)}
               >
                 OPEN
+              </button>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* 3. PROFILE (NEW) */}
+        <motion.div
+          style={styles.splitSection}
+          animate={{
+            flex: hoveredSide === "profile" ? 2.5 : hoveredSide ? 0.6 : 1,
+          }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          onMouseEnter={() => handleMouseEnter("profile")}
+          onMouseLeave={handleMouseLeave}
+          onClick={() => handleCardClick("profile")}
+        >
+          <div
+            style={{
+              ...styles.splitBg,
+              backgroundImage:
+                'url("https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop")',
+            }}
+          />
+          <div style={styles.overlayProfile} />
+
+          <div style={styles.splitContent}>
+            <motion.div
+              animate={{ scale: hoveredSide === "profile" ? 1.1 : 1 }}
+              style={{ marginBottom: 15 }}
+            >
+              <User
+                size={hoveredSide === "profile" ? (isMobile ? 50 : 80) : 40}
+                color="#fff"
+              />
+            </motion.div>
+
+            <h2
+              style={{
+                ...styles.splitTitle,
+                fontSize: isMobile ? "1.5rem" : "3rem",
+              }}
+            >
+              PROFILE
+            </h2>
+
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{
+                opacity: hoveredSide === "profile" ? 1 : 0,
+                height: hoveredSide === "profile" ? "auto" : 0,
+              }}
+              style={styles.splitHiddenContent}
+            >
+              {!isMobile && (
+                <ul style={styles.featureList}>
+                  <li>
+                    <span>Stats</span>
+                  </li>
+                  <li>
+                    <span>Settings</span>
+                  </li>
+                </ul>
+              )}
+              <button
+                style={styles.splitBtn}
+                onClick={(e) => handleButtonClick(e, setIsProfileOpen)}
+              >
+                VIEW
               </button>
             </motion.div>
           </div>
@@ -495,7 +561,7 @@ function GameBrowser({
                     <div style={styles.instaMediaContainer}>
                       <iframe
                         ref={(el) => (videoRefs.current[i] = el)}
-                        src={`https://www.youtube.com/embed/${post.embedId}?enablejsapi=1&mute=0&playsinline=1&controls=1&rel=0`}
+                        src={`.embedId}?enablejsapi=1&mute=0&playsinline=1&controls=1&rel=0`}
                         title={post.title}
                         style={styles.instaIframe}
                         allow="autoplay; encrypted-media"
@@ -527,6 +593,85 @@ function GameBrowser({
                     </div>
                   </motion.div>
                 ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* --- PROFILE MODAL (NEW) --- */}
+      <AnimatePresence>
+        {isProfileOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 100 }}
+            style={styles.modalOverlay}
+          >
+            <div
+              style={{
+                ...styles.instaModalContent,
+                height: "60vh",
+                justifyContent: "center",
+              }}
+            >
+              <button
+                onClick={() => setIsProfileOpen(false)}
+                style={{ ...styles.closeBtn, top: 10, right: 10 }}
+              >
+                <X size={20} />
+              </button>
+
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  padding: "2rem",
+                }}
+              >
+                <div
+                  style={{
+                    width: "100px",
+                    height: "100px",
+                    borderRadius: "50%",
+                    background:
+                      "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  <User size={50} color="#fff" />
+                </div>
+                <h2 style={{ color: "white", marginBottom: "0.5rem" }}>
+                  Gamer One
+                </h2>
+                <p style={{ color: "#888", marginBottom: "2rem" }}>
+                  Level 12 • 4500 Points
+                </p>
+
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    gap: "10px",
+                    flexDirection: "column",
+                  }}
+                >
+                  <button style={styles.profileBtn}>
+                    <Trophy size={18} /> Achievements
+                  </button>
+                  <button style={styles.profileBtn}>
+                    <Settings size={18} /> Settings
+                  </button>
+                  <button
+                    style={{ ...styles.profileBtn, background: "#ef4444" }}
+                  >
+                    <LogOut size={18} /> Logout
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>
@@ -639,12 +784,20 @@ const styles = {
       "linear-gradient(135deg, rgba(219, 39, 119, 0.9), rgba(225, 29, 72, 0.9))",
     zIndex: 1,
   },
+  // New Overlay for Profile (Orange/Amber)
+  overlayProfile: {
+    position: "absolute",
+    inset: 0,
+    background:
+      "linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9))",
+    zIndex: 1,
+  },
   splitContent: {
     position: "relative",
     zIndex: 10,
     textAlign: "center",
     width: "100%",
-    padding: "0 10px",
+    padding: "0 5px", // Reduced padding to fit 3 columns on mobile
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -655,6 +808,7 @@ const styles = {
     margin: "0",
     textShadow: "0 10px 30px rgba(0,0,0,0.3)",
     letterSpacing: "-1px",
+    // fontSize is handled inline for responsiveness
   },
   splitHiddenContent: {
     overflow: "hidden",
@@ -669,22 +823,38 @@ const styles = {
     textAlign: "center",
     opacity: 0.8,
     fontWeight: "500",
-    fontSize: "1rem",
+    fontSize: "0.9rem",
     lineHeight: "1.6",
   },
   splitBtn: {
     marginTop: "10px",
-    padding: "10px 25px",
+    padding: "8px 20px",
     borderRadius: "50px",
     background: "#fff",
     color: "#000",
     border: "none",
     fontWeight: "800",
-    fontSize: "0.8rem",
+    fontSize: "0.75rem",
     cursor: "pointer",
     letterSpacing: "1px",
     boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
     textTransform: "uppercase",
+  },
+
+  // Profile specific
+  profileBtn: {
+    width: "100%",
+    padding: "12px",
+    borderRadius: "12px",
+    background: "#333",
+    color: "white",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    cursor: "pointer",
+    fontSize: "0.9rem",
+    fontWeight: "600",
   },
 
   // --- MODALS ---
@@ -788,6 +958,7 @@ const styles = {
     flexDirection: "column",
     boxShadow: "0 0 50px rgba(0,0,0,0.8)",
     overflow: "hidden",
+    position: "relative",
   },
   instaStickyHeader: {
     height: "60px",
