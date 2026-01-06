@@ -224,15 +224,16 @@ function GameBrowser({
 
   // Auto Flex Animation
   useEffect(() => {
-    if (isMobile) return; // optional: disable auto on mobile if you want
-
-    // If user is interacting, pause auto animation
+    // Pause ONLY if user is interacting
     if (hoveredSide !== null) return;
 
-    autoTimerRef.current = setTimeout(() => {
-      setHoveredSide(sides[autoIndex]);
-      setAutoIndex((prev) => (prev + 1) % sides.length);
-    }, 100); // 👈 time each card stays expanded
+    autoTimerRef.current = setTimeout(
+      () => {
+        setHoveredSide(sides[autoIndex]);
+        setAutoIndex((prev) => (prev + 1) % sides.length);
+      },
+      isMobile ? 10 : 10
+    ); // slightly faster on mobile
 
     return () => clearTimeout(autoTimerRef.current);
   }, [autoIndex, hoveredSide, isMobile]);
@@ -901,7 +902,6 @@ const styles = {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    padding: "1rem",
   },
   modalContent: {
     width: "100%",
@@ -983,8 +983,7 @@ const styles = {
   // --- INSTAGRAM MODAL ---
   instaModalContent: {
     width: "100%",
-    maxWidth: "450px",
-    height: "90vh",
+    height: "100vh",
     background: "#000",
     border: "1px solid #333",
     borderRadius: "20px",
