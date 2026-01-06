@@ -2,27 +2,33 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
 import {
-  Play,
   Gamepad2,
   Rocket,
   Star,
   X,
   Youtube,
-  Tv,
-  Music,
-  Smile,
   ArrowLeft,
   Heart,
   MessageCircle,
-  Send,
-  Bookmark,
-  MoreHorizontal,
+  Play,
+  Music,
 } from "lucide-react";
 
 // !!! IMPORT YOUR JSON FILE HERE !!!
 import loadingAnimation from "./loading.json";
 
-import "./index.css";
+// We inject the font and basic resets here to ensure the look matches the CodePen
+const GlobalStyles = () => (
+  <style>
+    {`
+      body { 
+      font-family: "Montserrat", system-ui, Avenir, Helvetica, Arial, sans-serif;
+      margin : 0;
+      }
+      .hover-target { cursor: pointer; }
+    `}
+  </style>
+);
 
 // --- Game Data Configuration ---
 const GAMES = [
@@ -61,7 +67,7 @@ const GAMES = [
   },
 ];
 
-// --- Social Media / Video Data (Instagram Style) ---
+// --- Social Media Data ---
 const SOCIAL_FEED = [
   {
     id: 1,
@@ -245,22 +251,15 @@ const SOCIAL_FEED = [
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
-
-  // Navigation States
   const [isArcadeOpen, setIsArcadeOpen] = useState(false);
   const [isSocialOpen, setIsSocialOpen] = useState(false);
-
-  // Active Media States
   const [activeGame, setActiveGame] = useState(null);
-
-  // NOTE: For Instagram style, we play videos inline, so we don't need a full-screen overlay state for videos anymore.
 
   // Simulate Loading Delay
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
-    }, 4000);
-
+    }, 3000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -270,6 +269,7 @@ export default function App() {
 
   return (
     <div style={styles.appContainer}>
+      <GlobalStyles />
       <AnimatePresence mode="wait">
         {isLoading ? (
           <LoadingScreen key="loader" />
@@ -282,7 +282,6 @@ export default function App() {
             style={{ height: "100%", width: "100%" }}
           >
             {activeGame ? (
-              /* --- GAME PLAYER OVERLAY --- */
               <div style={styles.fullScreenOverlay}>
                 <motion.button
                   initial={{ y: -50, opacity: 0 }}
@@ -301,7 +300,6 @@ export default function App() {
                 />
               </div>
             ) : (
-              /* --- MAIN MENU BROWSER --- */
               <GameBrowser
                 onPlayGame={handlePlayGame}
                 isArcadeOpen={isArcadeOpen}
@@ -332,16 +330,15 @@ function LoadingScreen() {
           <Lottie animationData={loadingAnimation} loop={true} />
         )}
       </div>
-
       <motion.div
         initial={{ width: 0 }}
         animate={{ width: "200px" }}
-        transition={{ duration: 3.5, ease: "easeInOut" }}
+        transition={{ duration: 2.5, ease: "easeInOut" }}
         style={styles.loadingBarContainer}
       >
         <div style={styles.loadingBarFill} />
       </motion.div>
-      <p style={styles.loadingText}>INITIALIZING ARCADE...</p>
+      <p style={styles.loadingText}>INITIALIZING SYSTEM...</p>
     </motion.div>
   );
 }
@@ -354,115 +351,159 @@ function GameBrowser({
   isSocialOpen,
   setIsSocialOpen,
 }) {
-  const videoRefs = React.useRef([]);
+  const [hoveredSide, setHoveredSide] = useState(null); // 'left' or 'right'
+  const videoRefs = useRef([]);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const iframe = entry.target;
-          const player = iframe.contentWindow;
-
-          if (!player) return;
-
-          if (entry.isIntersecting) {
-            // ▶️ PLAY when visible
-            player.postMessage(
-              JSON.stringify({
-                event: "command",
-                func: "playVideo",
-                args: [],
-              }),
-              "*"
-            );
-          } else {
-            // ⏸ PAUSE when out of view
-            player.postMessage(
-              JSON.stringify({
-                event: "command",
-                func: "pauseVideo",
-                args: [],
-              }),
-              "*"
-            );
-          }
-        });
-      },
-      {
-        threshold: 0.6, // 60% visible = active video
-      }
-    );
-
-    // Observe all video iframes
-    videoRefs.current.forEach((iframe) => {
-      if (iframe) observer.observe(iframe);
-    });
-
-    return () => observer.disconnect();
-  }, [isSocialOpen]);
+  // --- Header Component ---
+  const Header = () => (
+    <div style={styles.floatingHeader}>
+      <Gamepad2 size={28} color="#fff" />
+      <span style={{ fontWeight: 800, fontSize: "1.2rem", letterSpacing: 1 }}>
+        CLOUD<span style={{ color: "#4ade80" }}>MALL</span>
+      </span>
+    </div>
+  );
 
   return (
     <div style={styles.browserContainer}>
-      {/* Background Ambience */}
-      <div style={styles.orb1} />
-      <div style={styles.orb2} />
+      <Header />
 
-      <header style={styles.header}>
-        <div style={styles.logoArea}>
-          <Gamepad2 size={32} color="#fff" />
-          <h1 style={styles.logoText}>
-            CLOUD<span style={{ color: "#4ade80" }}>MALL</span>
-          </h1>
-        </div>
-      </header>
-
-      {/* --- MAIN MENU SELECTION --- */}
-      <div style={styles.mainMenuWrapper}>
-        {/* 1. ARCADE BUTTON SECTION */}
+      {/* --- NEW SPLIT MENU DESIGN --- */}
+      <div style={styles.splitMenuWrapper}>
+        {/* LEFT SIDE: ARCADE */}
         <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          style={styles.splitSection}
+          animate={{
+            flex:
+              hoveredSide === "left" ? 2 : hoveredSide === "right" ? 0.8 : 1,
+          }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          onMouseEnter={() => setHoveredSide("left")}
+          onMouseLeave={() => setHoveredSide(null)}
           onClick={() => setIsArcadeOpen(true)}
-          style={styles.bigMenuCard}
         >
-          <div style={styles.menuCardBgArcade} />
-          <div style={styles.menuContent}>
-            <Gamepad2 size={60} color="#fff" style={{ marginBottom: "1rem" }} />
-            <h2 style={styles.menuTitle}>Arcade Zone</h2>
-            <p style={styles.menuDesc}>Play exciting games!</p>
-            <button style={styles.exploreBtn}>ENTER ARCADE</button>
+          {/* Background Image */}
+          <div
+            style={{
+              ...styles.splitBg,
+              backgroundImage:
+                'url("https://images.unsplash.com/photo-1511512578047-dfb367046420?q=80&w=2071&auto=format&fit=crop")',
+            }}
+          />
+          {/* Gradient Overlay */}
+          <div style={styles.overlayArcade} />
+
+          <div style={styles.splitContent}>
+            <motion.div
+              animate={{ scale: hoveredSide === "left" ? 1.1 : 1 }}
+              style={{ marginBottom: 20 }}
+            >
+              <Gamepad2 size={hoveredSide === "left" ? 80 : 50} color="#fff" />
+            </motion.div>
+
+            <h2 style={styles.splitTitle}>
+              ARCADE
+              <br />
+              ZONE
+            </h2>
+
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{
+                opacity: hoveredSide === "left" ? 1 : 0,
+                height: hoveredSide === "left" ? "auto" : 0,
+              }}
+              style={styles.splitHiddenContent}
+            >
+              <ul style={styles.featureList}>
+                <li>
+                  <span>Puzzles & Logic</span>
+                </li>
+                <li>
+                  <span>Action Heroes</span>
+                </li>
+                <li>
+                  <span>Rhythm Games</span>
+                </li>
+              </ul>
+              <button style={styles.splitBtn}>PLAY NOW</button>
+            </motion.div>
           </div>
         </motion.div>
 
-        {/* 2. SOCIAL BUTTON SECTION */}
+        {/* RIGHT SIDE: SOCIAL */}
         <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          style={styles.splitSection}
+          animate={{
+            flex:
+              hoveredSide === "right" ? 2 : hoveredSide === "left" ? 0.8 : 1,
+          }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          onMouseEnter={() => setHoveredSide("right")}
+          onMouseLeave={() => setHoveredSide(null)}
           onClick={() => setIsSocialOpen(true)}
-          style={styles.bigMenuCard}
         >
-          <div style={styles.menuCardBgSocial} />
-          <div style={styles.menuContent}>
-            <Youtube size={60} color="#fff" style={{ marginBottom: "1rem" }} />
-            <h2 style={styles.menuTitle}>Watch & Chill</h2>
-            <p style={styles.menuDesc}>Trending videos!</p>
-            <button style={styles.exploreBtn}>OPEN FEED</button>
+          {/* Background Image */}
+          <div
+            style={{
+              ...styles.splitBg,
+              backgroundImage:
+                'url("https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=1974&auto=format&fit=crop")',
+            }}
+          />
+          {/* Gradient Overlay */}
+          <div style={styles.overlaySocial} />
+
+          <div style={styles.splitContent}>
+            <motion.div
+              animate={{ scale: hoveredSide === "right" ? 1.1 : 1 }}
+              style={{ marginBottom: 20 }}
+            >
+              <Youtube size={hoveredSide === "right" ? 80 : 50} color="#fff" />
+            </motion.div>
+
+            <h2 style={styles.splitTitle}>
+              WATCH
+              <br />& CHILL
+            </h2>
+
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{
+                opacity: hoveredSide === "right" ? 1 : 0,
+                height: hoveredSide === "right" ? "auto" : 0,
+              }}
+              style={styles.splitHiddenContent}
+            >
+              <ul style={styles.featureList}>
+                <li>
+                  <span>Cartoons</span>
+                </li>
+                <li>
+                  <span>Music Videos</span>
+                </li>
+                <li>
+                  <span>Teen Vibes</span>
+                </li>
+              </ul>
+              <button style={styles.splitBtn}>OPEN FEED</button>
+            </motion.div>
           </div>
         </motion.div>
       </div>
 
-      {/* --- ARCADE MODAL (Standard Grid) --- */}
+      {/* --- ARCADE MODAL --- */}
       <AnimatePresence>
         {isArcadeOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             style={styles.modalOverlay}
           >
             <div style={styles.modalContent}>
               <div style={styles.modalHeader}>
-                <h2 style={styles.modalTitle}>Choose Your Game</h2>
+                <h2 style={styles.modalTitle}>ARCADE GAMES</h2>
                 <button
                   onClick={() => setIsArcadeOpen(false)}
                   style={styles.modalCloseBtn}
@@ -519,18 +560,16 @@ function GameBrowser({
         )}
       </AnimatePresence>
 
-      {/* --- SOCIAL MODAL (INSTAGRAM VIEW) --- */}
+      {/* --- SOCIAL MODAL --- */}
       <AnimatePresence>
         {isSocialOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 50 }}
+            initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 50 }}
+            exit={{ opacity: 0, y: 100 }}
             style={styles.modalOverlay}
           >
-            {/* Phone-like container */}
             <div style={styles.instaModalContent}>
-              {/* Insta Header */}
               <div style={styles.instaStickyHeader}>
                 <button
                   onClick={() => setIsSocialOpen(false)}
@@ -539,32 +578,28 @@ function GameBrowser({
                   <ArrowLeft size={24} />
                 </button>
                 <span style={styles.instaHeaderTitle}>CloudGram</span>
-                <div style={{ width: 24 }} /> {/* Spacer */}
+                <div style={{ width: 24 }} />
               </div>
 
-              {/* Feed Container */}
               <div style={styles.instaFeed}>
                 {SOCIAL_FEED.map((post, i) => (
                   <motion.div
                     key={post.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.1 }}
                     style={styles.instaPost}
                   >
-                    {/* Post Media (YouTube Embed acting as the post content) */}
                     <div style={styles.instaMediaContainer}>
                       <iframe
                         ref={(el) => (videoRefs.current[i] = el)}
-                        src={`https://www.youtube.com/embed/${post.embedId}?enablejsapi=1&mute=1&playsinline=1&controls=1&rel=0`}
+                        src={`https://www.youtube.com/embed/${post.embedId}?enablejsapi=1&mute=0&playsinline=1&controls=1&rel=0`}
                         title={post.title}
                         style={styles.instaIframe}
                         allow="autoplay; encrypted-media"
                         allowFullScreen
                       />
                     </div>
-
-                    {/* Action Bar */}
                     <div style={styles.instaActionBar}>
                       <div style={styles.instaActionLeft}>
                         <Heart
@@ -579,8 +614,6 @@ function GameBrowser({
                         />
                       </div>
                     </div>
-
-                    {/* Likes & Caption */}
                     <div style={styles.instaFooter}>
                       <div style={styles.instaLikes}>{post.likes} likes</div>
                       <div style={styles.instaCaption}>
@@ -589,10 +622,6 @@ function GameBrowser({
                         </span>
                         {post.caption}
                       </div>
-                      <div style={styles.instaComments}>
-                        View all {post.comments} comments
-                      </div>
-                      <div style={styles.instaTime}>2 hours ago</div>
                     </div>
                   </motion.div>
                 ))}
@@ -605,21 +634,15 @@ function GameBrowser({
   );
 }
 
-// ---------- CSS-in-JS Styles ----------
+// ---------- STYLES ----------
 const styles = {
   appContainer: {
     width: "100vw",
     height: "100vh",
-    marginBottom: "50px",
-    backgroundColor: "#09090b",
+    backgroundColor: "#000",
     color: "#ffffff",
     overflow: "hidden",
-    position: "relative",
-    fontFamily:
-      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
   },
-
-  // --- LOADING ---
   loadingContainer: {
     display: "flex",
     flexDirection: "column",
@@ -627,8 +650,8 @@ const styles = {
     alignItems: "center",
     height: "100vh",
     width: "100vw",
-    backgroundColor: "#000",
-    zIndex: 50,
+    backgroundColor: "#111",
+    zIndex: 999,
   },
   lottieWrapper: { width: 300, height: 300, marginBottom: "2rem" },
   loadingBarContainer: {
@@ -649,137 +672,153 @@ const styles = {
     fontSize: "0.8rem",
     letterSpacing: "0.2em",
     fontWeight: "600",
+    fontFamily: "Poppins, sans-serif",
   },
 
-  // --- BROWSER ---
+  // --- SPLIT MENU LAYOUT (The Requested UI Change) ---
   browserContainer: {
     height: "100%",
     width: "100%",
     position: "relative",
-    padding: "2rem",
-    boxSizing: "border-box",
-    background: "radial-gradient(circle at center, #1a1a2e 0%, #000 100%)",
-    overflowY: "auto",
-  },
-  header: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: "2rem",
-    position: "relative",
-    zIndex: 10,
-  },
-  logoArea: { display: "flex", alignItems: "center", gap: "0.75rem" },
-  logoText: { fontSize: "2rem", fontWeight: "800", letterSpacing: "-0.05em" },
-
-  // --- MAIN MENU SELECTION ---
-  mainMenuWrapper: {
-    display: "flex",
-    gap: "3rem",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "60vh",
-    position: "relative",
-    zIndex: 10,
-    flexWrap: "wrap",
-    paddingBottom: "150px",
-  },
-  bigMenuCard: {
-    position: "relative",
-    width: "350px",
-    height: "450px",
-    borderRadius: "24px",
     overflow: "hidden",
+  },
+  floatingHeader: {
+    position: "absolute",
+    top: "30px",
+    left: "35%",
+    zIndex: 50,
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+    background: "rgba(0,0,0,0.5)",
+    backdropFilter: "blur(5px)",
+    padding: "10px 20px",
+    borderRadius: "50px",
+  },
+  splitMenuWrapper: {
+    display: "flex",
+    width: "100%",
+    height: "100%",
+  },
+  splitSection: {
+    position: "relative",
+    height: "100%",
     cursor: "pointer",
-    boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    flexShrink: 0,
-  },
-  menuCardBgArcade: {
-    position: "absolute",
-    inset: 0,
-    background: "linear-gradient(135deg, #7c3aed 0%, #2563eb 100%)",
-    opacity: 0.8,
-  },
-  menuCardBgSocial: {
-    position: "absolute",
-    inset: 0,
-    background: "linear-gradient(135deg, #db2777 0%, #e11d48 100%)",
-    opacity: 0.8,
-  },
-  menuContent: {
-    position: "absolute",
-    inset: 0,
+    overflow: "hidden",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 2,
-    padding: "2rem",
     textAlign: "center",
+    borderRight: "1px solid rgba(255,255,255,0.1)",
   },
-  menuTitle: {
-    fontSize: "2.5rem",
-    fontWeight: "800",
-    margin: "0 0 0.5rem 0",
-    textShadow: "0 2px 10px rgba(0,0,0,0.3)",
+  splitBg: {
+    position: "absolute",
+    inset: 0,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    transition: "transform 1s ease",
+    zIndex: 0,
   },
-  menuDesc: {
+  // Gradients to match the colors in your original code
+  overlayArcade: {
+    position: "absolute",
+    inset: 0,
+    background:
+      "linear-gradient(135deg, rgba(124, 58, 237, 0.85), rgba(37, 99, 235, 0.85))",
+    zIndex: 1,
+  },
+  overlaySocial: {
+    position: "absolute",
+    inset: 0,
+    background:
+      "linear-gradient(135deg, rgba(219, 39, 119, 0.85), rgba(225, 29, 72, 0.85))",
+    zIndex: 1,
+  },
+  splitContent: {
+    position: "relative",
+    zIndex: 10,
+    textAlign: "center",
+    width: "100%",
+    padding: "0 20px",
+  },
+  splitTitle: {
+    fontSize: "4rem",
+    fontWeight: "900",
+    lineHeight: "1",
+    margin: "0",
+    textShadow: "0 10px 30px rgba(0,0,0,0.3)",
+    letterSpacing: "-2px",
+  },
+  splitHiddenContent: {
+    overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  featureList: {
+    listStyle: "none",
+    padding: 0,
+    margin: "20px 0",
+    textAlign: "center",
+    opacity: 0.8,
+    fontWeight: "500",
     fontSize: "1.1rem",
-    opacity: 0.9,
-    marginBottom: "2rem",
+    lineHeight: "1.8",
   },
-  exploreBtn: {
-    padding: "0.8rem 2rem",
-    borderRadius: "100px",
-    border: "none",
-    background: "white",
+  splitBtn: {
+    marginTop: "10px",
+    padding: "12px 35px",
+    borderRadius: "50px",
+    background: "#fff",
     color: "#000",
-    fontWeight: "bold",
+    border: "none",
+    fontWeight: "800",
+    fontSize: "0.9rem",
     cursor: "pointer",
-    boxShadow: "0 4px 15px rgba(255,255,255,0.3)",
+    letterSpacing: "1px",
+    boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
+    textTransform: "uppercase",
   },
 
-  // --- STANDARD MODAL (Arcade) ---
+  // --- MODALS (Grid) ---
   modalOverlay: {
     position: "fixed",
     inset: 0,
     zIndex: 100,
-    background: "rgba(0,0,0,0.8)",
-    backdropFilter: "blur(10px)",
+    background: "rgba(0,0,0,0.9)",
+    backdropFilter: "blur(15px)",
     display: "flex",
     justifyContent: "center",
-    alignItems: "flex-start",
-    padding: "0 0 2rem 0",
+    alignItems: "center", // Centered for PC
   },
   modalContent: {
     width: "100%",
-    maxWidth: "1200px",
+    maxWidth: "1100px",
     height: "85vh",
-    background: "rgba(20, 20, 25, 0.95)",
-    border: "1px solid rgba(255,255,255,0.1)",
+    background: "#1a1a1d",
     borderRadius: "24px",
-    padding: "2rem",
+    padding: "2.5rem",
     display: "flex",
     flexDirection: "column",
     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+    border: "1px solid #333",
   },
   modalHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: "2rem",
-    borderBottom: "1px solid rgba(255,255,255,0.1)",
-    paddingBottom: "1rem",
   },
   modalTitle: {
     fontSize: "2rem",
-    fontWeight: "bold",
+    fontWeight: "800",
     margin: 0,
     color: "#fff",
+    letterSpacing: "-1px",
   },
   modalCloseBtn: {
-    background: "rgba(255,255,255,0.1)",
+    background: "#333",
     border: "none",
     color: "#fff",
     borderRadius: "50%",
@@ -789,25 +828,25 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
+    transition: "background 0.2s",
   },
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
     gap: "2rem",
     overflowY: "auto",
-    padding: "1rem",
+    padding: "0.5rem",
   },
   card: {
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "#27272a",
     borderRadius: "20px",
     overflow: "hidden",
     cursor: "pointer",
-    transition: "all 0.3s ease",
-    border: "1px solid rgba(255,255,255,0.05)",
+    border: "1px solid #3f3f46",
   },
   cardImageContainer: {
     position: "relative",
-    height: "180px",
+    height: "160px",
     width: "100%",
   },
   cardImage: {
@@ -817,30 +856,27 @@ const styles = {
   },
   categoryBadge: {
     position: "absolute",
-    top: "12px",
-    left: "12px",
-    padding: "6px 12px",
+    top: "10px",
+    left: "10px",
+    padding: "5px 10px",
     borderRadius: "100px",
     display: "flex",
     alignItems: "center",
-    gap: "6px",
-    fontSize: "0.75rem",
+    gap: "5px",
+    fontSize: "0.7rem",
     fontWeight: "700",
     color: "#000",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
   },
-  cardInfo: { padding: "1.25rem" },
-  cardTitle: { margin: "0 0 0.5rem 0", fontSize: "1.1rem", fontWeight: "600" },
-  stars: { display: "flex", gap: "2px" },
+  cardInfo: { padding: "1.2rem" },
+  cardTitle: { margin: "0 0 0.5rem 0", fontSize: "1.1rem", fontWeight: "700" },
+  stars: { display: "flex", gap: "3px" },
 
-  // --- INSTAGRAM STYLE MODAL ---
+  // --- INSTAGRAM MODAL ---
   instaModalContent: {
     width: "100%",
-    maxWidth: "480px", // Mobile width
-    height: "90vh",
+    height: "100vh",
     background: "#000",
-    border: "1px solid #262626",
-    borderRadius: "32px",
+    border: "1px solid #333",
     display: "flex",
     flexDirection: "column",
     boxShadow: "0 0 50px rgba(0,0,0,0.8)",
@@ -865,117 +901,40 @@ const styles = {
   },
   instaHeaderTitle: {
     fontWeight: "bold",
-    fontSize: "1rem",
-    fontFamily: "Instagram Sans, sans-serif",
+    fontSize: "1.1rem",
   },
   instaFeed: {
     flex: 1,
     overflowY: "auto",
-    scrollbarWidth: "none", // Hide scrollbar Firefox
-    msOverflowStyle: "none", // Hide scrollbar IE
     paddingBottom: "2rem",
   },
   instaPost: {
-    marginBottom: "1rem",
+    marginBottom: "1.5rem",
     borderBottom: "1px solid #1a1a1a",
     paddingBottom: "1rem",
   },
-  instaPostHeader: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "0.75rem 1rem",
-  },
-  instaUserGroup: {
-    display: "flex",
-    alignItems: "center",
-    gap: "0.75rem",
-  },
-  instaAvatarRing: {
-    width: "36px",
-    height: "36px",
-    borderRadius: "50%",
-    padding: "2px",
-    background:
-      "linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  instaAvatar: {
-    width: "100%",
-    height: "100%",
-    borderRadius: "50%",
-    objectFit: "cover",
-    border: "2px solid #000",
-  },
-  instaUserInfo: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  instaUsername: {
-    fontWeight: "bold",
-    fontSize: "0.9rem",
-    lineHeight: "1.1",
-  },
-  instaLocation: {
-    fontSize: "0.75rem",
-    color: "#a8a8a8",
-  },
   instaMediaContainer: {
     width: "100%",
-    aspectRatio: "1/1", // Square aspect ratio typically, or 4:5
+    aspectRatio: "1/1",
     backgroundColor: "#111",
-    position: "relative",
   },
   instaIframe: {
     width: "100%",
     height: "100%",
     border: "none",
-    display: "block",
   },
   instaActionBar: {
     display: "flex",
-    justifyContent: "space-between",
-    padding: "0.75rem 1rem",
+    padding: "0.8rem 1rem",
   },
-  instaActionLeft: {
-    display: "flex",
-    gap: "1rem",
-  },
-  actionIcon: {
-    cursor: "pointer",
-  },
-  instaFooter: {
-    padding: "0 1rem",
-  },
-  instaLikes: {
-    fontWeight: "bold",
-    fontSize: "0.9rem",
-    marginBottom: "0.5rem",
-  },
-  instaCaption: {
-    fontSize: "0.9rem",
-    lineHeight: "1.4",
-    marginBottom: "0.25rem",
-  },
-  instaUsernameInline: {
-    fontWeight: "bold",
-    marginRight: "0.5rem",
-  },
-  instaComments: {
-    color: "#a8a8a8",
-    fontSize: "0.9rem",
-    marginBottom: "0.25rem",
-    cursor: "pointer",
-  },
-  instaTime: {
-    color: "#737373",
-    fontSize: "0.7rem",
-    textTransform: "uppercase",
-  },
+  instaActionLeft: { display: "flex", gap: "1rem" },
+  actionIcon: { cursor: "pointer" },
+  instaFooter: { padding: "0 1rem" },
+  instaLikes: { fontWeight: "bold", marginBottom: "0.3rem" },
+  instaCaption: { fontSize: "0.9rem", lineHeight: "1.4" },
+  instaUsernameInline: { fontWeight: "bold", marginRight: "0.5rem" },
 
-  // --- GAME PLAYER ---
+  // --- FULL SCREEN GAME ---
   fullScreenOverlay: {
     position: "fixed",
     inset: 0,
@@ -991,7 +950,7 @@ const styles = {
     background: "#ef4444",
     color: "white",
     border: "none",
-    padding: "0.5rem 1.2rem",
+    padding: "0.5rem 1.5rem",
     borderRadius: "100px",
     display: "flex",
     alignItems: "center",
