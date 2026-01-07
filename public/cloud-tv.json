@@ -1,0 +1,43 @@
+{
+  "version": "1.0",
+  "updated": "2026-01-01",
+  "categories": [
+    {
+      "id": "kids",
+      "title": "Kids",
+      "channels": [
+        {
+          "id": "cn",
+          "name": "Cartoon Network",
+          "logo": "https://link-to-logo.png",
+          "country": "US",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://some-embed-url",
+            "hls": "https://some-stream.m3u8",
+            "backup": ["https://backup1.m3u8", "https://backup2.m3u8"]
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "sports",
+      "title": "Sports",
+      "channels": [
+        {
+          "id": "supersport1",
+          "name": "SuperSport 1",
+          "logo": "https://link-to-logo.png",
+          "country": "ZA",
+          "priority": "player",
+          "streams": {
+            "iframe": "",
+            "hls": "https://sports-stream.m3u8",
+            "backup": []
+          }
+        }
+      ]
+    }
+  ]
+}

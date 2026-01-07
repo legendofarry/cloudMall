@@ -1,3 +1,4 @@
+// src\App.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
@@ -269,6 +270,12 @@ function GameBrowser({
   const [autoIndex, setAutoIndex] = useState(0);
   const autoTimerRef = useRef(null);
 
+  const [tvData, setTvData] = useState([]); // Stores channels from cloud-tv.json
+  const [loadingChannels, setLoadingChannels] = useState(true);
+
+  const [activeChannel, setActiveChannel] = useState(null); // For playback modal
+  const [isPlaying, setIsPlaying] = useState(false);
+
   // Detect Mobile View
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -309,6 +316,28 @@ function GameBrowser({
     return () => clearTimeout(resetTimer);
   }, [hoveredSide, isMobile]);
 
+  useEffect(() => {
+    if (!isTvOpen) return; // Only fetch when modal is opened
+
+    setLoadingChannels(true);
+
+    fetch("/cloud-tv.json")
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data.categories)
+          throw new Error("Invalid Cloud TV JSON structure");
+        const allChannels = data.categories.flatMap((cat) =>
+          cat.channels.map((ch) => ({ ...ch, categoryTitle: cat.title }))
+        );
+        setTvData(allChannels);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch Cloud TV JSON:", err);
+        setTvData([]);
+      })
+      .finally(() => setLoadingChannels(false));
+  }, [isTvOpen]);
+
   // --- Interaction Handlers ---
   const handleMouseEnter = (side) => {
     if (!isMobile) setHoveredSide(side);
@@ -327,6 +356,11 @@ function GameBrowser({
   const handleButtonClick = (e, setOpenAction) => {
     e.stopPropagation();
     setOpenAction(true);
+  };
+
+  const handleChannelClick = (channel) => {
+    setActiveChannel(channel);
+    setIsPlaying(true);
   };
 
   const Header = () => (
@@ -640,42 +674,48 @@ function GameBrowser({
               </div>
 
               <div style={styles.channelGrid}>
-                {TV_CHANNELS.map((channel, i) => (
-                  <motion.div
-                    key={channel.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                    style={styles.channelCard}
-                  >
-                    <div style={styles.channelPreview}>
-                      {/* Fake "Live" Badge */}
-                      <div style={styles.liveBadge}>
-                        <div style={styles.liveDot} /> CLOUD TV+
+                {loadingChannels ? (
+                  <p style={{ color: "#fff" }}>Loading channels...</p>
+                ) : tvData.length === 0 ? (
+                  <p style={{ color: "#fff" }}>No channels available</p>
+                ) : (
+                  tvData.map((channel, i) => (
+                    <motion.div
+                      key={channel.id}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: i * 0.05 }}
+                      whileHover={{ scale: 1.05 }}
+                      style={styles.channelCard}
+                      onClick={() => handleChannelClick(channel)}
+                    >
+                      <div style={styles.channelPreview}>
+                        <div style={styles.liveBadge}>
+                          <div style={styles.liveDot} /> LIVE
+                        </div>
+                        <img
+                          src={channel.logo}
+                          alt={channel.name}
+                          style={styles.channelLogo}
+                        />
+                        <div style={styles.playOverlay}>
+                          <Play fill="#fff" size={30} />
+                        </div>
                       </div>
-                      <img
-                        src={channel.logo}
-                        alt={channel.name}
-                        style={styles.channelLogo}
-                      />
-                      <div style={styles.playOverlay}>
-                        <Play fill="#fff" size={30} />
+                      <div style={styles.channelInfo}>
+                        <h3 style={styles.channelName}>{channel.name}</h3>
+                        <span
+                          style={{
+                            ...styles.channelCategory,
+                            color: "#4ade80",
+                          }}
+                        >
+                          {channel.categoryTitle}
+                        </span>
                       </div>
-                    </div>
-                    <div style={styles.channelInfo}>
-                      <h3 style={styles.channelName}>{channel.name}</h3>
-                      <span
-                        style={{
-                          ...styles.channelCategory,
-                          color: channel.color,
-                        }}
-                      >
-                        {channel.category}
-                      </span>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  ))
+                )}
               </div>
             </div>
           </motion.div>
@@ -898,7 +938,112 @@ function GameBrowser({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {isPlaying && activeChannel && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={styles.modalOverlay}
+          >
+            <div style={styles.modalContent}>
+              <div style={styles.modalHeader}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
+                  <Tv size={28} color="#ef4444" />
+                  <h2 style={styles.modalTitle}>{activeChannel.name}</h2>
+                </div>
+                <button
+                  onClick={() => setIsPlaying(false)}
+                  style={styles.modalCloseBtn}
+                >
+                  <X size={28} />
+                </button>
+              </div>
+
+              <div style={{ flex: 1, position: "relative" }}>
+                <ChannelPlayer channel={activeChannel} />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
+  );
+}
+
+function ChannelPlayer({ channel }) {
+  const videoRef = useRef(null);
+  const [currentHlsIndex, setCurrentHlsIndex] = useState(0);
+  const [iframeFailed, setIframeFailed] = useState(false);
+
+  // Attempt iframe first if priority is "iframe"
+  useEffect(() => {
+    if (channel.priority === "iframe" && channel.streams.iframe) {
+      const timeout = setTimeout(() => {
+        setIframeFailed(true); // If iframe does not load in 4s, fallback
+      }, 4000);
+      return () => clearTimeout(timeout);
+    } else {
+      setIframeFailed(true); // Skip iframe
+    }
+  }, [channel]);
+
+  // If iframe failed or priority is "player", we load HLS
+  useEffect(() => {
+    if (!iframeFailed) return;
+
+    if (!channel.streams.hls) return;
+
+    // Dynamically import Hls.js only if needed
+    import("hls.js").then((Hls) => {
+      if (Hls.default.isSupported()) {
+        const hls = new Hls.default();
+        hls.loadSource(channel.streams.hls);
+        hls.attachMedia(videoRef.current);
+        hls.on(Hls.default.Events.ERROR, function (event, data) {
+          console.error("HLS.js error", data);
+          // Try backup URLs
+          if (channel.streams.backup?.length > 0) {
+            const nextIndex =
+              (currentHlsIndex + 1) % channel.streams.backup.length;
+            setCurrentHlsIndex(nextIndex);
+            hls.loadSource(channel.streams.backup[nextIndex]);
+            hls.startLoad();
+          }
+        });
+      } else {
+        // Native HLS fallback
+        videoRef.current.src = channel.streams.hls;
+      }
+    });
+  }, [iframeFailed, channel, currentHlsIndex]);
+
+  // Render iframe or video
+  if (
+    !iframeFailed &&
+    channel.priority === "iframe" &&
+    channel.streams.iframe
+  ) {
+    return (
+      <iframe
+        src={channel.streams.iframe}
+        style={{ width: "100%", height: "100%", border: "none" }}
+        title={channel.name}
+        sandbox="allow-scripts allow-same-origin allow-presentation"
+      />
+    );
+  }
+
+  return (
+    <video
+      ref={videoRef}
+      controls
+      autoPlay
+      style={{ width: "100%", height: "100%", background: "#000" }}
+    />
   );
 }
 
