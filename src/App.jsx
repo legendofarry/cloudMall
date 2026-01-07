@@ -1,4 +1,3 @@
-// src\App.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Lottie from "lottie-react";
@@ -11,10 +10,12 @@ import {
   ArrowLeft,
   Heart,
   MessageCircle,
-  User, // Added User icon
+  User,
   Settings,
   LogOut,
   Trophy,
+  Tv, // Added TV icon
+  Play,
 } from "lucide-react";
 
 // !!! IMPORT YOUR JSON FILE HERE !!!
@@ -27,16 +28,19 @@ const GlobalStyles = () => (
       body { 
         font-family: "Montserrat", sans-serif;
         margin: 0;
-        overflow: hidden; /* Prevent scrolling on the main page */
+        overflow: hidden; 
         background-color: #000;
       }
       a,p,span,button,h1,h2,h3,h4,h5,h6 {font-family: "Montserrat", sans-serif;}
       .hover-target { cursor: pointer; }
+      
+      /* Hide scrollbar for modals */
+      ::-webkit-scrollbar { width: 0px; background: transparent; }
     `}
   </style>
 );
 
-// --- Game Data Configuration ---
+// --- Game Data ---
 const GAMES = [
   {
     id: 1,
@@ -73,6 +77,52 @@ const GAMES = [
   },
 ];
 
+// --- TV Channels Data (New) ---
+const TV_CHANNELS = [
+  {
+    id: 1,
+    name: "Toon Global",
+    category: "Kids",
+    logo: "https://cdn-icons-png.flaticon.com/512/3075/3075908.png",
+    color: "#f472b6",
+  },
+  {
+    id: 2,
+    name: "Sport Center",
+    category: "Live Sports",
+    logo: "https://cdn-icons-png.flaticon.com/512/5351/5351486.png",
+    color: "#60a5fa",
+  },
+  {
+    id: 3,
+    name: "Movie Max",
+    category: "Cinema",
+    logo: "https://cdn-icons-png.flaticon.com/512/3163/3163478.png",
+    color: "#fbbf24",
+  },
+  {
+    id: 4,
+    name: "News 24/7",
+    category: "News",
+    logo: "https://cdn-icons-png.flaticon.com/512/2965/2965879.png",
+    color: "#ef4444",
+  },
+  {
+    id: 5,
+    name: "Discovery+",
+    category: "Nature",
+    logo: "https://cdn-icons-png.flaticon.com/512/2038/2038089.png",
+    color: "#4ade80",
+  },
+  {
+    id: 6,
+    name: "Music Hits",
+    category: "Music",
+    logo: "https://cdn-icons-png.flaticon.com/512/3075/3075886.png",
+    color: "#c084fc",
+  },
+];
+
 // --- Social Media Data ---
 const SOCIAL_FEED = [
   {
@@ -93,7 +143,6 @@ const SOCIAL_FEED = [
     comments: "54",
     caption: "Sing along 🎶",
   },
-  // ... more data
 ];
 
 export default function App() {
@@ -101,9 +150,10 @@ export default function App() {
   const [activeGame, setActiveGame] = useState(null);
 
   // Navigation States
+  const [isTvOpen, setIsTvOpen] = useState(false); // New
   const [isArcadeOpen, setIsArcadeOpen] = useState(false);
   const [isSocialOpen, setIsSocialOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false); // New State
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Simulate Loading Delay
   useEffect(() => {
@@ -152,6 +202,9 @@ export default function App() {
             ) : (
               <GameBrowser
                 onPlayGame={handlePlayGame}
+                // Pass states
+                isTvOpen={isTvOpen}
+                setIsTvOpen={setIsTvOpen}
                 isArcadeOpen={isArcadeOpen}
                 setIsArcadeOpen={setIsArcadeOpen}
                 isSocialOpen={isSocialOpen}
@@ -198,6 +251,8 @@ function LoadingScreen() {
 // ---------- Main Browser ----------
 function GameBrowser({
   onPlayGame,
+  isTvOpen,
+  setIsTvOpen,
   isArcadeOpen,
   setIsArcadeOpen,
   isSocialOpen,
@@ -205,12 +260,12 @@ function GameBrowser({
   isProfileOpen,
   setIsProfileOpen,
 }) {
-  // hoveredSide can be: 'arcade' | 'watch' | 'profile' | null
+  // hoveredSide can be: 'tv' | 'arcade' | 'watch' | 'profile' | null
   const [hoveredSide, setHoveredSide] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
   const videoRefs = useRef([]);
 
-  const sides = ["arcade", "watch", "profile"];
+  const sides = ["tv", "arcade", "watch", "profile"];
   const [autoIndex, setAutoIndex] = useState(0);
   const autoTimerRef = useRef(null);
 
@@ -222,9 +277,10 @@ function GameBrowser({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Auto Flex Animation
+  // Auto Flex Cards
+  // --- AUTO FLEX (PC + MOBILE) ---
   useEffect(() => {
-    // Pause ONLY if user is interacting
+    // If user is interacting, pause autoplay
     if (hoveredSide !== null) return;
 
     autoTimerRef.current = setTimeout(
@@ -233,24 +289,27 @@ function GameBrowser({
         setAutoIndex((prev) => (prev + 1) % sides.length);
       },
       isMobile ? 10 : 10
-    ); // slightly faster on mobile
+    ); // mobile slightly faster
 
     return () => clearTimeout(autoTimerRef.current);
   }, [autoIndex, hoveredSide, isMobile]);
 
-  // Shrink Back
+  // Shrink back card
+  // --- RESET AFTER EXPAND ---
   useEffect(() => {
     if (hoveredSide === null) return;
 
-    const resetTimer = setTimeout(() => {
-      setHoveredSide(null);
-    }, 2500); // 👈 how long before shrinking back
+    const resetTimer = setTimeout(
+      () => {
+        setHoveredSide(null);
+      },
+      isMobile ? 2000 : 2200
+    );
 
     return () => clearTimeout(resetTimer);
-  }, [hoveredSide]);
+  }, [hoveredSide, isMobile]);
 
   // --- Interaction Handlers ---
-
   const handleMouseEnter = (side) => {
     if (!isMobile) setHoveredSide(side);
   };
@@ -261,9 +320,7 @@ function GameBrowser({
 
   const handleCardClick = (side) => {
     if (isMobile) {
-      if (hoveredSide !== side) {
-        setHoveredSide(side);
-      }
+      if (hoveredSide !== side) setHoveredSide(side);
     }
   };
 
@@ -285,14 +342,81 @@ function GameBrowser({
     <div style={styles.browserContainer}>
       <Header />
 
-      {/* --- SPLIT MENU WRAPPER (Now 3 Sections) --- */}
+      {/* --- SPLIT MENU WRAPPER (4 SECTIONS) --- */}
       <div style={styles.splitMenuWrapper}>
-        {/* 1. ARCADE */}
+        {/* 1. CLOUD TV+ (NEW) */}
         <motion.div
           style={styles.splitSection}
           animate={{
-            // Logic: If this is active -> 2.5. If something else is active -> 0.6. If none -> 1.
-            flex: hoveredSide === "arcade" ? 2.5 : hoveredSide ? 0.6 : 1,
+            // If this is active -> 3. If others active -> 0.4. If none -> 1.
+            flex: hoveredSide === "tv" ? 3 : hoveredSide ? 0.4 : 1,
+          }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          onMouseEnter={() => handleMouseEnter("tv")}
+          onMouseLeave={handleMouseLeave}
+          onClick={() => handleCardClick("tv")}
+        >
+          <div
+            style={{
+              ...styles.splitBg,
+              backgroundImage:
+                'url("https://images.unsplash.com/photo-1593784991095-a20506948430?q=80&w=2070&auto=format&fit=crop")',
+            }}
+          />
+          <div style={styles.overlayTv} />
+
+          <div style={styles.splitContent}>
+            <motion.div
+              animate={{ scale: hoveredSide === "tv" ? 1.1 : 1 }}
+              style={{ marginBottom: 15 }}
+            >
+              <Tv
+                size={hoveredSide === "tv" ? (isMobile ? 50 : 80) : 40}
+                color="#fff"
+              />
+            </motion.div>
+            <h2
+              style={{
+                ...styles.splitTitle,
+                fontSize: isMobile ? "1.2rem" : "2.5rem",
+              }}
+            >
+              CLOUD TV+
+            </h2>
+
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{
+                opacity: hoveredSide === "tv" ? 1 : 0,
+                height: hoveredSide === "tv" ? "auto" : 0,
+              }}
+              style={styles.splitHiddenContent}
+            >
+              {!isMobile && (
+                <ul style={styles.featureList}>
+                  <li>
+                    <span>Channels</span>
+                  </li>
+                  <li>
+                    <span>Live Sports</span>
+                  </li>
+                </ul>
+              )}
+              <button
+                style={styles.splitBtn}
+                onClick={(e) => handleButtonClick(e, setIsTvOpen)}
+              >
+                WATCH
+              </button>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* 2. ARCADE */}
+        <motion.div
+          style={styles.splitSection}
+          animate={{
+            flex: hoveredSide === "arcade" ? 3 : hoveredSide ? 0.4 : 1,
           }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
           onMouseEnter={() => handleMouseEnter("arcade")}
@@ -318,11 +442,10 @@ function GameBrowser({
                 color="#fff"
               />
             </motion.div>
-
             <h2
               style={{
                 ...styles.splitTitle,
-                fontSize: isMobile ? "1.5rem" : "3rem", // Adjusted for 3 cards
+                fontSize: isMobile ? "1.2rem" : "2.5rem",
               }}
             >
               ARCADE
@@ -339,10 +462,10 @@ function GameBrowser({
               {!isMobile && (
                 <ul style={styles.featureList}>
                   <li>
-                    <span>Puzzles</span>
+                    <span>Games</span>
                   </li>
                   <li>
-                    <span>Action</span>
+                    <span>Fun</span>
                   </li>
                 </ul>
               )}
@@ -356,11 +479,11 @@ function GameBrowser({
           </div>
         </motion.div>
 
-        {/* 2. WATCH */}
+        {/* 3. WATCH */}
         <motion.div
-          style={{ ...styles.splitSection, flex: 1.4 }}
+          style={styles.splitSection}
           animate={{
-            flex: hoveredSide === "watch" ? 2.5 : hoveredSide ? 0.6 : 1,
+            flex: hoveredSide === "watch" ? 3 : hoveredSide ? 0.4 : 1,
           }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
           onMouseEnter={() => handleMouseEnter("watch")}
@@ -386,11 +509,10 @@ function GameBrowser({
                 color="#fff"
               />
             </motion.div>
-
             <h2
               style={{
                 ...styles.splitTitle,
-                fontSize: isMobile ? "1.5rem" : "3rem",
+                fontSize: isMobile ? "1.2rem" : "2.5rem",
               }}
             >
               WATCH
@@ -410,7 +532,7 @@ function GameBrowser({
                     <span>Videos</span>
                   </li>
                   <li>
-                    <span>Music</span>
+                    <span>Clips</span>
                   </li>
                 </ul>
               )}
@@ -424,11 +546,11 @@ function GameBrowser({
           </div>
         </motion.div>
 
-        {/* 3. PROFILE (NEW) */}
+        {/* 4. PROFILE */}
         <motion.div
           style={styles.splitSection}
           animate={{
-            flex: hoveredSide === "profile" ? 2.5 : hoveredSide ? 0.6 : 1,
+            flex: hoveredSide === "profile" ? 3 : hoveredSide ? 0.4 : 1,
           }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
           onMouseEnter={() => handleMouseEnter("profile")}
@@ -454,11 +576,10 @@ function GameBrowser({
                 color="#fff"
               />
             </motion.div>
-
             <h2
               style={{
                 ...styles.splitTitle,
-                fontSize: isMobile ? "1.5rem" : "3rem",
+                fontSize: isMobile ? "1.2rem" : "2.5rem",
               }}
             >
               PROFILE
@@ -478,7 +599,7 @@ function GameBrowser({
                     <span>Stats</span>
                   </li>
                   <li>
-                    <span>Settings</span>
+                    <span>Menu</span>
                   </li>
                 </ul>
               )}
@@ -492,6 +613,74 @@ function GameBrowser({
           </div>
         </motion.div>
       </div>
+
+      {/* --- LIVE TV MODAL (NEW) --- */}
+      <AnimatePresence>
+        {isTvOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={styles.modalOverlay}
+          >
+            <div style={styles.modalContent}>
+              <div style={styles.modalHeader}>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
+                >
+                  <Tv size={28} color="#ef4444" />
+                  <h2 style={styles.modalTitle}>LIVE CHANNELS</h2>
+                </div>
+                <button
+                  onClick={() => setIsTvOpen(false)}
+                  style={styles.modalCloseBtn}
+                >
+                  <X size={28} />
+                </button>
+              </div>
+
+              <div style={styles.channelGrid}>
+                {TV_CHANNELS.map((channel, i) => (
+                  <motion.div
+                    key={channel.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.1 }}
+                    whileHover={{ scale: 1.05 }}
+                    style={styles.channelCard}
+                  >
+                    <div style={styles.channelPreview}>
+                      {/* Fake "Live" Badge */}
+                      <div style={styles.liveBadge}>
+                        <div style={styles.liveDot} /> CLOUD TV+
+                      </div>
+                      <img
+                        src={channel.logo}
+                        alt={channel.name}
+                        style={styles.channelLogo}
+                      />
+                      <div style={styles.playOverlay}>
+                        <Play fill="#fff" size={30} />
+                      </div>
+                    </div>
+                    <div style={styles.channelInfo}>
+                      <h3 style={styles.channelName}>{channel.name}</h3>
+                      <span
+                        style={{
+                          ...styles.channelCategory,
+                          color: channel.color,
+                        }}
+                      >
+                        {channel.category}
+                      </span>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* --- ARCADE MODAL --- */}
       <AnimatePresence>
@@ -631,7 +820,7 @@ function GameBrowser({
         )}
       </AnimatePresence>
 
-      {/* --- PROFILE MODAL (NEW) --- */}
+      {/* --- PROFILE MODAL --- */}
       <AnimatePresence>
         {isProfileOpen && (
           <motion.div
@@ -778,7 +967,7 @@ const styles = {
   },
   splitMenuWrapper: {
     display: "flex",
-    flexDirection: "row", // ALWAYS ROW
+    flexDirection: "row",
     width: "100%",
     height: "100%",
   },
@@ -794,9 +983,6 @@ const styles = {
     textAlign: "center",
     borderRight: "1px solid rgba(255,255,255,0.1)",
   },
-  middleCard: {
-    flex: 2.5,
-  },
   splitBg: {
     position: "absolute",
     inset: 0,
@@ -805,34 +991,43 @@ const styles = {
     transition: "transform 1s ease",
     zIndex: 0,
   },
+
+  // Overlays
+  overlayTv: {
+    position: "absolute",
+    inset: 0,
+    background:
+      "linear-gradient(135deg, rgba(220, 38, 38, 0.9), rgba(153, 27, 27, 0.9))", // Red
+    zIndex: 1,
+  },
   overlayArcade: {
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(135deg, rgba(124, 58, 237, 0.9), rgba(37, 99, 235, 0.9))",
+      "linear-gradient(135deg, rgba(124, 58, 237, 0.9), rgba(37, 99, 235, 0.9))", // Purple/Blue
     zIndex: 1,
   },
   overlaySocial: {
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(135deg, rgba(219, 39, 119, 0.9), rgba(225, 29, 72, 0.9))",
+      "linear-gradient(135deg, rgba(219, 39, 119, 0.9), rgba(225, 29, 72, 0.9))", // Pink
     zIndex: 1,
   },
-  // New Overlay for Profile (Orange/Amber)
   overlayProfile: {
     position: "absolute",
     inset: 0,
     background:
-      "linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9))",
+      "linear-gradient(135deg, rgba(245, 158, 11, 0.9), rgba(217, 119, 6, 0.9))", // Amber
     zIndex: 1,
   },
+
   splitContent: {
     position: "relative",
     zIndex: 10,
     textAlign: "center",
     width: "100%",
-    padding: "0 5px", // Reduced padding to fit 3 columns on mobile
+    padding: "0 2px", // Tight padding for 4 items
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -843,7 +1038,7 @@ const styles = {
     margin: "0",
     textShadow: "0 10px 30px rgba(0,0,0,0.3)",
     letterSpacing: "-1px",
-    // fontSize is handled inline for responsiveness
+    whiteSpace: "nowrap", // Prevent breaking into ugly lines
   },
   splitHiddenContent: {
     overflow: "hidden",
@@ -854,22 +1049,22 @@ const styles = {
   featureList: {
     listStyle: "none",
     padding: 0,
-    margin: "15px 0",
+    margin: "10px 0",
     textAlign: "center",
     opacity: 0.8,
     fontWeight: "500",
-    fontSize: "0.9rem",
+    fontSize: "0.8rem",
     lineHeight: "1.6",
   },
   splitBtn: {
     marginTop: "10px",
-    padding: "8px 20px",
+    padding: "8px 16px",
     borderRadius: "50px",
     background: "#fff",
     color: "#000",
     border: "none",
     fontWeight: "800",
-    fontSize: "0.75rem",
+    fontSize: "0.7rem",
     cursor: "pointer",
     letterSpacing: "1px",
     boxShadow: "0 10px 20px rgba(0,0,0,0.2)",
@@ -897,23 +1092,24 @@ const styles = {
     position: "fixed",
     inset: 0,
     zIndex: 100,
-    background: "rgba(0,0,0,0.9)",
-    backdropFilter: "blur(15px)",
+    background: "rgba(0,0,0,0.95)",
+    backdropFilter: "blur(20px)",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    padding: "1rem",
   },
   modalContent: {
     width: "100%",
     maxWidth: "1100px",
     height: "90vh",
-    background: "#1a1a1d",
+    background: "#0f0f11",
     borderRadius: "24px",
     padding: "1.5rem",
     display: "flex",
     flexDirection: "column",
     boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-    border: "1px solid #333",
+    border: "1px solid #222",
   },
   modalHeader: {
     display: "flex",
@@ -946,6 +1142,91 @@ const styles = {
     overflowY: "auto",
     padding: "0.5rem",
   },
+
+  // --- TV CHANNEL STYLES ---
+  channelGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+    gap: "2rem",
+    overflowY: "auto",
+    padding: "1rem",
+  },
+  channelCard: {
+    position: "relative",
+    backgroundColor: "#1e1e24",
+    borderRadius: "16px",
+    overflow: "hidden",
+    cursor: "pointer",
+    border: "1px solid #333",
+    boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+  },
+  channelPreview: {
+    height: "160px",
+    width: "100%",
+    background: "radial-gradient(circle at center, #2a2a30 0%, #1e1e24 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  channelLogo: {
+    width: "80px",
+    height: "80px",
+    objectFit: "contain",
+    filter: "drop-shadow(0 0 10px rgba(255,255,255,0.2))",
+    zIndex: 2,
+  },
+  liveBadge: {
+    position: "absolute",
+    top: "10px",
+    left: "10px",
+    background: "rgba(220, 38, 38, 0.9)", // Red
+    color: "white",
+    fontSize: "0.7rem",
+    fontWeight: "bold",
+    padding: "4px 8px",
+    borderRadius: "4px",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    zIndex: 5,
+    boxShadow: "0 0 10px #ef4444",
+  },
+  liveDot: {
+    width: "6px",
+    height: "6px",
+    background: "white",
+    borderRadius: "50%",
+  },
+  playOverlay: {
+    position: "absolute",
+    inset: 0,
+    background: "rgba(0,0,0,0.5)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 0,
+    transition: "opacity 0.2s",
+    zIndex: 4,
+  },
+  // Hover effect handled in JS via style injection isn't ideal for complex children,
+  // so we rely on the main card hover in JS to handle scale.
+  // CSS pseudo-class for hover opacity:
+  channelInfo: {
+    padding: "1.2rem",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    background: "#18181b",
+  },
+  channelName: { margin: 0, fontSize: "1.1rem", color: "white" },
+  channelCategory: {
+    fontSize: "0.8rem",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+  },
+
+  // --- STANDARD CARD STYLES ---
   card: {
     backgroundColor: "#27272a",
     borderRadius: "20px",
@@ -983,7 +1264,8 @@ const styles = {
   // --- INSTAGRAM MODAL ---
   instaModalContent: {
     width: "100%",
-    height: "100vh",
+    maxWidth: "450px",
+    height: "90vh",
     background: "#000",
     border: "1px solid #333",
     borderRadius: "20px",
