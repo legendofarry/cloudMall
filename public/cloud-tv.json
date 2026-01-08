@@ -9,13 +9,61 @@
         {
           "id": "cn",
           "name": "Cartoon Network",
-          "logo": "https://link-to-logo.png",
+          "logo": "https://logo.clearbit.com/cartoonnetwork.com",
           "country": "US",
           "priority": "iframe",
           "streams": {
-            "iframe": "https://some-embed-url",
-            "hls": "https://some-stream.m3u8",
-            "backup": ["https://backup1.m3u8", "https://backup2.m3u8"]
+            "iframe": "https://embed.example.com/cn",
+            "hls": "https://stream.example.com/cn.m3u8",
+            "backup": []
+          }
+        },
+        {
+          "id": "nick",
+          "name": "Nickelodeon",
+          "logo": "https://logo.clearbit.com/nick.com",
+          "country": "US",
+          "priority": "player",
+          "streams": {
+            "iframe": "",
+            "hls": "https://stream.example.com/nick.m3u8",
+            "backup": []
+          }
+        },
+        {
+          "id": "disneyjr",
+          "name": "Disney Junior",
+          "logo": "https://logo.clearbit.com/disneyjunior.com",
+          "country": "US",
+          "priority": "player",
+          "streams": {
+            "iframe": "",
+            "hls": "https://stream.example.com/disneyjr.m3u8",
+            "backup": []
+          }
+        },
+        {
+          "id": "boomerang",
+          "name": "Boomerang",
+          "logo": "https://logo.clearbit.com/boomerangtv.com",
+          "country": "US",
+          "priority": "player",
+          "streams": {
+            "iframe": "",
+            "hls": "https://stream.example.com/boomerang.m3u8",
+            "backup": []
+          }
+        },
+        {
+          "id": "pbskids",
+          "name": "PBS Kids",
+          "logo": "https://logo.clearbit.com/pbs.org",
+          "country": "US",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/pbskids",
+            "hls": "",
+            "backup": []
           }
         }
       ]
@@ -28,12 +76,261 @@
         {
           "id": "supersport1",
           "name": "SuperSport 1",
-          "logo": "https://link-to-logo.png",
+          "logo": "https://logo.clearbit.com/supersport.com",
           "country": "ZA",
           "priority": "player",
           "streams": {
             "iframe": "",
-            "hls": "https://sports-stream.m3u8",
+            "hls": "https://stream.example.com/ss1.m3u8",
+            "backup": []
+          }
+        },
+        {
+          "id": "espn",
+          "name": "ESPN",
+          "logo": "https://logo.clearbit.com/espn.com",
+          "country": "US",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/espn",
+            "hls": "",
+            "backup": []
+          }
+        },
+        {
+          "id": "skysports",
+          "name": "Sky Sports",
+          "logo": "https://logo.clearbit.com/skysports.com",
+          "country": "UK",
+          "priority": "player",
+          "streams": {
+            "iframe": "",
+            "hls": "https://stream.example.com/skysports.m3u8",
+            "backup": []
+          }
+        },
+        {
+          "id": "bein",
+          "name": "beIN Sports",
+          "logo": "https://logo.clearbit.com/beinsports.com",
+          "country": "FR",
+          "priority": "player",
+          "streams": {
+            "iframe": "",
+            "hls": "https://stream.example.com/bein.m3u8",
+            "backup": []
+          }
+        },
+        {
+          "id": "foxsports",
+          "name": "Fox Sports",
+          "logo": "https://logo.clearbit.com/foxsports.com",
+          "country": "US",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/foxsports",
+            "hls": "",
+            "backup": []
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "movies",
+      "title": "Movies",
+      "channels": [
+        {
+          "id": "hbo",
+          "name": "HBO",
+          "logo": "https://logo.clearbit.com/hbo.com",
+          "country": "US",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/hbo",
+            "hls": "",
+            "backup": []
+          }
+        },
+        {
+          "id": "cinemax",
+          "name": "Cinemax",
+          "logo": "https://logo.clearbit.com/cinemax.com",
+          "country": "US",
+          "priority": "player",
+          "streams": {
+            "iframe": "",
+            "hls": "https://stream.example.com/cinemax.m3u8",
+            "backup": []
+          }
+        },
+        {
+          "id": "starz",
+          "name": "Starz",
+          "logo": "https://logo.clearbit.com/starz.com",
+          "country": "US",
+          "priority": "player",
+          "streams": {
+            "iframe": "",
+            "hls": "https://stream.example.com/starz.m3u8",
+            "backup": []
+          }
+        },
+        {
+          "id": "showtime",
+          "name": "Showtime",
+          "logo": "https://logo.clearbit.com/showtime.com",
+          "country": "US",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/showtime",
+            "hls": "",
+            "backup": []
+          }
+        },
+        {
+          "id": "amc",
+          "name": "AMC",
+          "logo": "https://logo.clearbit.com/amc.com",
+          "country": "US",
+          "priority": "player",
+          "streams": {
+            "iframe": "",
+            "hls": "https://stream.example.com/amc.m3u8",
+            "backup": []
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "news",
+      "title": "News",
+      "channels": [
+        {
+          "id": "cnn",
+          "name": "CNN",
+          "logo": "https://logo.clearbit.com/cnn.com",
+          "country": "US",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/cnn",
+            "hls": "",
+            "backup": []
+          }
+        },
+        {
+          "id": "bbc",
+          "name": "BBC World News",
+          "logo": "https://logo.clearbit.com/bbc.com",
+          "country": "UK",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/bbc",
+            "hls": "",
+            "backup": []
+          }
+        },
+        {
+          "id": "aljazeera",
+          "name": "Al Jazeera",
+          "logo": "https://logo.clearbit.com/aljazeera.com",
+          "country": "QA",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/aljazeera",
+            "hls": "",
+            "backup": []
+          }
+        },
+        {
+          "id": "euronews",
+          "name": "Euronews",
+          "logo": "https://logo.clearbit.com/euronews.com",
+          "country": "EU",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/euronews",
+            "hls": "",
+            "backup": []
+          }
+        },
+        {
+          "id": "cnbc",
+          "name": "CNBC",
+          "logo": "https://logo.clearbit.com/cnbc.com",
+          "country": "US",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/cnbc",
+            "hls": "",
+            "backup": []
+          }
+        }
+      ]
+    },
+
+    {
+      "id": "kenya",
+      "title": "Kenya",
+      "channels": [
+        {
+          "id": "ktn",
+          "name": "KTN News",
+          "logo": "https://logo.clearbit.com/standardmedia.co.ke",
+          "country": "KE",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/ktn",
+            "hls": "",
+            "backup": []
+          }
+        },
+        {
+          "id": "citizen",
+          "name": "Citizen TV",
+          "logo": "https://logo.clearbit.com/citizentv.co.ke",
+          "country": "KE",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/citizen",
+            "hls": "",
+            "backup": []
+          }
+        },
+        {
+          "id": "ntvke",
+          "name": "NTV Kenya",
+          "logo": "https://logo.clearbit.com/ntvkenya.co.ke",
+          "country": "KE",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/ntv",
+            "hls": "",
+            "backup": []
+          }
+        },
+        {
+          "id": "kbc",
+          "name": "KBC Channel 1",
+          "logo": "https://logo.clearbit.com/kbc.co.ke",
+          "country": "KE",
+          "priority": "player",
+          "streams": {
+            "iframe": "",
+            "hls": "https://stream.example.com/kbc.m3u8",
+            "backup": []
+          }
+        },
+        {
+          "id": "inoro",
+          "name": "Inooro TV",
+          "logo": "https://logo.clearbit.com/royalmedia.co.ke",
+          "country": "KE",
+          "priority": "iframe",
+          "streams": {
+            "iframe": "https://embed.example.com/inooro",
+            "hls": "",
             "backup": []
           }
         }

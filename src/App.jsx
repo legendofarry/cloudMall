@@ -37,6 +37,39 @@ const GlobalStyles = () => (
       
       /* Hide scrollbar for modals */
       ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+      categoryTabs: {
+  display: "flex",
+  gap: "10px",
+  marginBottom: "1rem",
+  overflowX: "auto",
+},
+
+categoryTab: {
+  padding: "8px 16px",
+  borderRadius: "20px",
+  border: "none",
+  cursor: "pointer",
+  fontWeight: "700",
+  whiteSpace: "nowrap",
+},
+
+searchInput: {
+  width: "100%",
+  padding: "12px 16px",
+  borderRadius: "12px",
+  border: "1px solid #333",
+  background: "#111",
+  color: "#fff",
+  marginBottom: "1.5rem",
+},
+
+categoryTitle: {
+  color: "#4ade80",
+  fontWeight: "800",
+  marginBottom: "1rem",
+},
+
     `}
   </style>
 );
@@ -75,52 +108,6 @@ const GAMES = [
       "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&h=400&fit=crop",
     color: "#22d3ee",
     icon: <Gamepad2 size={20} />,
-  },
-];
-
-// --- TV Channels Data (New) ---
-const TV_CHANNELS = [
-  {
-    id: 1,
-    name: "Toon Global",
-    category: "Kids",
-    logo: "https://cdn-icons-png.flaticon.com/512/3075/3075908.png",
-    color: "#f472b6",
-  },
-  {
-    id: 2,
-    name: "Sport Center",
-    category: "Live Sports",
-    logo: "https://cdn-icons-png.flaticon.com/512/5351/5351486.png",
-    color: "#60a5fa",
-  },
-  {
-    id: 3,
-    name: "Movie Max",
-    category: "Cinema",
-    logo: "https://cdn-icons-png.flaticon.com/512/3163/3163478.png",
-    color: "#fbbf24",
-  },
-  {
-    id: 4,
-    name: "News 24/7",
-    category: "News",
-    logo: "https://cdn-icons-png.flaticon.com/512/2965/2965879.png",
-    color: "#ef4444",
-  },
-  {
-    id: 5,
-    name: "Discovery+",
-    category: "Nature",
-    logo: "https://cdn-icons-png.flaticon.com/512/2038/2038089.png",
-    color: "#4ade80",
-  },
-  {
-    id: 6,
-    name: "Music Hits",
-    category: "Music",
-    logo: "https://cdn-icons-png.flaticon.com/512/3075/3075886.png",
-    color: "#c084fc",
   },
 ];
 
@@ -270,11 +257,15 @@ function GameBrowser({
   const [autoIndex, setAutoIndex] = useState(0);
   const autoTimerRef = useRef(null);
 
-  const [tvData, setTvData] = useState([]); // Stores channels from cloud-tv.json
+  const [tvCategories, setTvCategories] = useState([]);
+
   const [loadingChannels, setLoadingChannels] = useState(true);
 
   const [activeChannel, setActiveChannel] = useState(null); // For playback modal
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const [activeCategory, setActiveCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Detect Mobile View
   useEffect(() => {
@@ -317,24 +308,24 @@ function GameBrowser({
   }, [hoveredSide, isMobile]);
 
   useEffect(() => {
-    if (!isTvOpen) return; // Only fetch when modal is opened
+    if (!isTvOpen) return;
 
     setLoadingChannels(true);
 
-    fetch("/cloud-tv.json")
+    fetch(
+      "https://raw.githubusercontent.com/legendofarry/cloudMallChannels/main/cloud-tv.json"
+    )
       .then((res) => res.json())
       .then((data) => {
-        if (!data.categories)
-          throw new Error("Invalid Cloud TV JSON structure");
-        const allChannels = data.categories.flatMap((cat) =>
-          cat.channels.map((ch) => ({ ...ch, categoryTitle: cat.title }))
-        );
-        setTvData(allChannels);
+        const categories = data.categories || [];
+        setTvCategories(categories);
+
+        // ✅ Default tab
+        if (categories.length > 0) {
+          setActiveCategoryId("all");
+        }
       })
-      .catch((err) => {
-        console.error("Failed to fetch Cloud TV JSON:", err);
-        setTvData([]);
-      })
+      .catch(() => setTvCategories([]))
       .finally(() => setLoadingChannels(false));
   }, [isTvOpen]);
 
@@ -371,6 +362,25 @@ function GameBrowser({
       </span>
     </div>
   );
+
+  const allChannels = tvCategories.flatMap((cat) =>
+    cat.channels.map((ch) => ({
+      ...ch,
+      categoryId: cat.id,
+      categoryTitle: cat.title,
+    }))
+  );
+
+  const filteredChannels = allChannels.filter((channel) => {
+    const matchesCategory =
+      activeCategory === "all" || channel.categoryId === activeCategory;
+
+    const matchesSearch = channel.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div style={styles.browserContainer}>
@@ -415,7 +425,7 @@ function GameBrowser({
                 fontSize: isMobile ? "1.2rem" : "2.5rem",
               }}
             >
-              CLOUD TV+
+              TV
             </h2>
 
             <motion.div
@@ -673,50 +683,93 @@ function GameBrowser({
                 </button>
               </div>
 
-              <div style={styles.channelGrid}>
+              {/* --- CATEGORY TABS --- */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  marginBottom: "1rem",
+                  flexWrap: "wrap",
+                }}
+              >
+                <button
+                  onClick={() => setActiveCategory("all")}
+                  style={{
+                    padding: "6px 14px",
+                    borderRadius: "999px",
+                    border: "none",
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    background: activeCategory === "all" ? "#4ade80" : "#222",
+                    color: activeCategory === "all" ? "#000" : "#fff",
+                  }}
+                >
+                  All
+                </button>
+
                 {loadingChannels ? (
                   <p style={{ color: "#fff" }}>Loading channels...</p>
-                ) : tvData.length === 0 ? (
-                  <p style={{ color: "#fff" }}>No channels available</p>
+                ) : filteredChannels.length === 0 ? (
+                  <p style={{ color: "#fff" }}>No channels found</p>
                 ) : (
-                  tvData.map((channel, i) => (
-                    <motion.div
-                      key={channel.id}
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.05 }}
-                      whileHover={{ scale: 1.05 }}
-                      style={styles.channelCard}
-                      onClick={() => handleChannelClick(channel)}
-                    >
-                      <div style={styles.channelPreview}>
-                        <div style={styles.liveBadge}>
-                          <div style={styles.liveDot} /> LIVE
+                  <div style={styles.channelGrid}>
+                    {filteredChannels.map((channel, i) => (
+                      <motion.div
+                        key={channel.id}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: i * 0.03 }}
+                        whileHover={{ scale: 1.05 }}
+                        style={styles.channelCard}
+                        onClick={() => handleChannelClick(channel)}
+                      >
+                        <div style={styles.channelPreview}>
+                          <div style={styles.liveBadge}>
+                            <div style={styles.liveDot} /> LIVE
+                          </div>
+                          <img
+                            src={channel.logo}
+                            alt={channel.name}
+                            style={styles.channelLogo}
+                          />
+                          <div style={styles.playOverlay}>
+                            <Play fill="#fff" size={30} />
+                          </div>
                         </div>
-                        <img
-                          src={channel.logo}
-                          alt={channel.name}
-                          style={styles.channelLogo}
-                        />
-                        <div style={styles.playOverlay}>
-                          <Play fill="#fff" size={30} />
+
+                        <div style={styles.channelInfo}>
+                          <h3 style={styles.channelName}>{channel.name}</h3>
+                          <span
+                            style={{
+                              ...styles.channelCategory,
+                              color: "#4ade80",
+                            }}
+                          >
+                            {channel.categoryTitle}
+                          </span>
                         </div>
-                      </div>
-                      <div style={styles.channelInfo}>
-                        <h3 style={styles.channelName}>{channel.name}</h3>
-                        <span
-                          style={{
-                            ...styles.channelCategory,
-                            color: "#4ade80",
-                          }}
-                        >
-                          {channel.categoryTitle}
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))
+                      </motion.div>
+                    ))}
+                  </div>
                 )}
               </div>
+
+              <input
+                type="text"
+                placeholder="Search channels..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                style={{
+                  width: "100%",
+                  padding: "10px 14px",
+                  borderRadius: "12px",
+                  border: "1px solid #333",
+                  background: "#111",
+                  color: "#fff",
+                  marginBottom: "1.5rem",
+                  outline: "none",
+                }}
+              />
             </div>
           </motion.div>
         )}
