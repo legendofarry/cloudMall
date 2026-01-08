@@ -55,7 +55,7 @@ categoryTab: {
 },
 
 searchInput: {
-  width: "100%",
+  width: "80%",
   padding: "12px 16px",
   borderRadius: "12px",
   border: "1px solid #333",
@@ -760,13 +760,13 @@ function GameBrowser({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 style={{
-                  width: "100%",
+                  width: "60%",
+                  margin: "0 auto 1.5rem auto",
                   padding: "10px 14px",
                   borderRadius: "12px",
                   border: "1px solid #333",
                   background: "#111",
                   color: "#fff",
-                  marginBottom: "1.5rem",
                   outline: "none",
                 }}
               />
